@@ -40,7 +40,7 @@ func CheckNoChanges() error {
 		return fmt.Errorf("failed running git update-index --refresh, please fix the issues reported: %w", err)
 	}
 	fmt.Println(">> fmt - git diff-index")
-	err = sh.RunV("git", "diff-index", "--exit-code", "HEAD", " --")
+	err = sh.RunV("git", "diff-index", "--exit-code", "HEAD", "--")
 	if err != nil {
 		return fmt.Errorf("failed running go mod tidy, please fix the issues reported: %w", err)
 	}
