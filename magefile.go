@@ -43,6 +43,7 @@ var Aliases = map[string]interface{}{
 // Check runs all the checks
 // nolint: deadcode,unparam // it's used as a `mage` target and requires returning an error
 func Check() error {
+	mg.Deps(devtools.InstallGoLicenser)
 	mg.Deps(devtools.Deps.CheckModuleTidy, CheckLicenseHeaders)
 	mg.Deps(devtools.CheckNoChanges)
 	return nil
