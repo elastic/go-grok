@@ -17,7 +17,9 @@
 
 package mage
 
-import "github.com/elastic/go-grok/dev-tools/mage/gotool"
+import (
+	"github.com/elastic/go-grok/dev-tools/mage/gotool"
+)
 
 var (
 	// GoLicenserImportPath controls the import path used to install go-licenser.
