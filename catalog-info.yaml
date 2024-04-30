@@ -1,0 +1,30 @@
+# Declare your Buildkite pipelines below
+---
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: buildkite-pipeline-go-grok
+  description: Buildkite Pipeline for go-grok
+  links:
+    - title: Pipeline
+      url: https://buildkite.com/elastic/go-grok
+
+spec:
+  type: buildkite-pipeline
+  owner: group:elastic-agent-control-plane
+  system: buildkite
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: go-grok
+      description: 
+    spec:
+      repository: elastic/go-grok
+      pipeline_file: ".buildkite/pipeline.yml"
+      teams:
+        elastic-agent-control-plane:
+          access_level: MANAGE_BUILD_AND_READ
+        everyone:
+          access_level: READ_ONLY
