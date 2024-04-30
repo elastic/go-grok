@@ -26,4 +26,6 @@ import (
 	_ "go.elastic.co/go-licence-detector"
 
 	_ "github.com/elastic/go-licenser"
+
+	_ "golang.org/x/tools/cmd/goimports"
 )
