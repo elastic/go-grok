@@ -52,7 +52,7 @@ steps:
     command: |
       set -eo pipefail
       buildkite-agent artifact download "output-report-*.out" .
-      files=$(ls build/**/*.out)
+      files=$(ls *.out)
       echo "$files"
       for f in $files; do
       go-junit-report > "junit-report-$f.xml" < "$f"
