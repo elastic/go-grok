@@ -36,10 +36,7 @@ steps:
 
   - label: ":pipeline: Process junit reports"
     key: process-junit
-    command: |
-      set -eo pipefail
-      buildkite-agent artifact download "output-*.report" .
-      ls *.report | xargs -I{} sh -c 'go-junit-report > "$1-junit.xml" < $1' -- {}
+    command: ".buildkite/scripts/generate-report.sh"
     agents:
       provider: "gcp"
       image: "${IMAGE_UBUNTU_X86_64}"
