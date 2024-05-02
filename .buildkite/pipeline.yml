@@ -33,7 +33,7 @@ steps:
       machineType: "${GCP_DEFAULT_MACHINE_TYPE}"
     artifact_paths:
       - "output-*.report"
-  
+
   - label: ":windows: Test Windows"
     key: test-win
     command: |
