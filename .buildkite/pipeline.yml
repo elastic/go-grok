@@ -54,7 +54,8 @@ steps:
       buildkite-agent artifact download "output-report-*.out" .
       files=$(ls *.out)
       for f in $files; do
-      go-junit-report > "junit-report-$f.xml" < "$f"
+      go-junit-report -in "$f" -out "junit-report-$f.xml"
+      echo "Producing junit-report-$f.xml"
       done
       allfiles=$(ls .)
       echo "$allfiles"
