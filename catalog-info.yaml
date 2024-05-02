@@ -24,7 +24,7 @@ metadata:
 
 spec:
   type: buildkite-pipeline
-  owner: group:elastic-agent-control-plane
+  owner: group:ingest-fp
   system: buildkite
   implementation:
     apiVersion: buildkite.elastic.dev/v1
@@ -50,6 +50,8 @@ spec:
       skip_intermediate_builds_branch_filter: '!main'
       teams:
         elastic-agent-control-plane:
+          access_level: MANAGE_BUILD_AND_READ
+        ingest-fp:
           access_level: MANAGE_BUILD_AND_READ
         everyone:
           access_level: READ_ONLY
