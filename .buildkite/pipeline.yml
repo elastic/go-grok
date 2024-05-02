@@ -70,7 +70,7 @@ steps:
   - label: ":junit: Junit annotate"
     plugins:
       - junit-annotate#v2.4.1:
-          artifacts: "junit-report.xml"
+          artifacts: "junit-report-*.xml"
           fail-build-on-error: true
     agents:
       provider: "gcp" #junit plugin requires docker
