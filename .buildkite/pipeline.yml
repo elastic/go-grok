@@ -26,25 +26,25 @@ steps:
     key: test-lin
     command: |
       set -euo pipefail
-      go test -v > output-report-linux.out
+      go test -v > output-linux.report
     agents:
       provider: "gcp"
       image: "${IMAGE_UBUNTU_X86_64}"
       machineType: "${GCP_DEFAULT_MACHINE_TYPE}"
     artifact_paths:
-      - "output-report-*.out"
+      - "output-report-*../output-report-linux.report"
 
   - label: ":pipeline: Process junit reports"
     key: process-junit
     command: |
       set -eo pipefail
-      buildkite-agent artifact download "output-report-*.out" .
+      buildkite-agent artifact download "output-report-*.report" .
       allfiles=$(ls *)
       echo "$allfiles"
       echo "----"
-      ls .**/*.out | xargs echo
+      ls .**/*.report | xargs echo
       echo "----"
-      ls .**/*.out | xargs -I {} go-junit-report -out "./junit-report-{}.xml" -in {}
+      ls .**/*.report | xargs -I {} go-junit-report -out "{}-junit.xml" -in {}
       echo "----"
       allfiles=$(ls *.xml)
       echo "$allfiles"
