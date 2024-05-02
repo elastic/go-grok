@@ -48,6 +48,7 @@ steps:
       - "output-report-*.out"
 
   - label: ":pipeline: Process junit reports"
+    key: process-junit
     command: |
       set -eo pipefail
       buildkite-agent artifact download "output-report-*.out" .
@@ -60,6 +61,11 @@ steps:
       useCustomGlobalHooks: true
     artifact_paths: 
       junit-report-*
+    depends_on:
+      - step: "test-lin"
+        allow_failure: true
+      - step: "test-win"
+        allow_failure: true
 
   - label: ":junit: Junit annotate"
     plugins:
@@ -69,7 +75,5 @@ steps:
     agents:
       provider: "gcp" #junit plugin requires docker
     depends_on:
-      - step: "test-lin"
-        allow_failure: true
-      - step: "test-win"
+      - step: "process-junit"
         allow_failure: true
