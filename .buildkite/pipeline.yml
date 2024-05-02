@@ -41,6 +41,9 @@ steps:
       buildkite-agent artifact download "build/**/output-report-*.out" .
       allfiles=$(ls *)
       echo "$allfiles"
+      ls * | echo
+      ls .**/* | echo
+      ls /**/*.out | echo
       ls ./**/*.out | xargs -I {} go-junit-report -out "junit-report-{}.xml" -in {}
       allfiles=$(ls *.xml)
       echo "$allfiles"
