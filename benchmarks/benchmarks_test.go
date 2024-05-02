@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/elastic/grok-go"
+	"github.com/elastic/go-grok"
 	"github.com/stretchr/testify/require"
 	tgrok "github.com/trivago/grok"
 	vgrok "github.com/vjeantet/grok"

@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/elastic/grok-go/patterns"
+	"github.com/elastic/go-grok/patterns"
 )
 
 const dotSep = "___"

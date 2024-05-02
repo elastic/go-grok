@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/elastic/grok-go"
+	"github.com/elastic/go-grok"
 	"github.com/stretchr/testify/require"
 )
 
