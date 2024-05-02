@@ -1,7 +1,8 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/buildkite/pipeline-schema/main/schema.json
 env:
-  SETUP_MAGE_VERSION: '1.14.0'
+  SETUP_MAGE_VERSION: '1.15.0'
   SETUP_GVM_VERSION: 'v0.5.0'
+  ASDF_MAGE_VERSION: '1.15.0'
   GCP_DEFAULT_MACHINE_TYPE: "c2d-highcpu-8"
   GCP_WIN_MACHINE_TYPE: "n2-standard-8"
   IMAGE_MACOS_X86_64: "generic-13-ventura-x64"
@@ -11,6 +12,7 @@ env:
 steps:
   - label: ":buildkite: Lint"
     command: |
+      set -euo pipefail
       echo "--- Mage notice"
       mage notice
       echo "--- Mage check"
@@ -23,6 +25,7 @@ steps:
   - label: ":linux: Test Linux"
     key: test-lin
     command: |
+      set -euo pipefail
       go test -v > output-report-linux.out
     agents:
       provider: "gcp"
@@ -47,6 +50,7 @@ steps:
   - label: ":mac: Test MacOS"
     key: test-mac
     command: |
+      set -euo pipefail
       go test -v > output-report-macos.out
     agents:
       provider: "orka"
