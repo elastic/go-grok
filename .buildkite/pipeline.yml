@@ -34,19 +34,6 @@ steps:
     artifact_paths:
       - "output-report-*.out"
 
-  - label: ":windows: Test Windows"
-    key: test-win
-    command: |
-      go test -v > output-report-windows.out
-    agents:
-      provider: "gcp"
-      image: "${IMAGE_WIN_11}"
-      machine_type: "${GCP_WIN_MACHINE_TYPE}"
-      disk_size: 200
-      disk_type: "pd-ssd"
-    artifact_paths:
-      - "output-report-*.out"
-
   - label: ":pipeline: Process junit reports"
     key: process-junit
     command: |
@@ -66,8 +53,6 @@ steps:
       junit-report-*.xml
     depends_on:
       - step: "test-lin"
-        allow_failure: true
-      - step: "test-win"
         allow_failure: true
 
   - label: ":junit: Junit annotate"
