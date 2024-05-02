@@ -38,7 +38,7 @@ steps:
     key: process-junit
     command: |
       set -eo pipefail
-      buildkite-agent artifact download "build/**/output-report-*.out" .
+      buildkite-agent artifact download "output-report-*.out" .
       allfiles=$(ls *)
       echo "$allfiles"
       ls * | echo
