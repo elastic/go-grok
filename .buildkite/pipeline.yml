@@ -52,8 +52,7 @@ steps:
     command: |
       set -eo pipefail
       buildkite-agent artifact download "output-report-*.out" .
-      files="output-report-*.out"
-      for f in $files; do
+      for f in /buildkite/builds/*/elastic/go-grok/output-report-*.out; do
         go-junit-report > "${junit-report-$f.xml}" < $f
       done
     agents:
