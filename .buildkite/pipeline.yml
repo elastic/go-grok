@@ -8,8 +8,6 @@ env:
   IMAGE_UBUNTU_X86_64: "family/platform-ingest-beats-ubuntu-2204"
   IMAGE_WIN_11: "family/platform-ingest-beats-windows-11"
 
----
-# $yaml-language-server: $schema=https://raw.githubusercontent.com/buildkite/pipeline-schema/main/schema.json
 steps:
   - label: ":buildkite: Lint"
     command: |
