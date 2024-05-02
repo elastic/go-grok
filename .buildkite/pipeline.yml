@@ -42,9 +42,13 @@ steps:
       allfiles=$(ls *)
       echo "$allfiles"
       echo "----"
+      ls *.report | xargs echo
+      echo "----"
+      ls ./*.report | xargs echo
+      echo "----"
       ls .**/*.report | xargs echo
       echo "----"
-      ls .**/*.report | xargs -I {} go-junit-report -out "./{}-junit.xml" -in {}
+      ls .**/*.report | xargs -I {} echo "running go-junit-report -out "./{}-junit.xml" -in {}"; go-junit-report -out "./{}-junit.xml" -in {}
       echo "----"
       allfiles=$(ls *.xml)
       echo "$allfiles"
