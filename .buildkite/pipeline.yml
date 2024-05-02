@@ -56,6 +56,7 @@ steps:
       for f in $files; do
       go-junit-report > "junit-report-$f.xml" < "$f"
       done
+      ls .
     agents:
       image: "docker.elastic.co/ci-agent-images/platform-ingest/buildkite-agent-beats-ci-with-hooks:0.1"
       useCustomGlobalHooks: true
