@@ -2,60 +2,56 @@
 env:
   SETUP_MAGE_VERSION: '1.14.0'
   SETUP_GVM_VERSION: 'v0.5.0'
+  GCP_DEFAULT_MACHINE_TYPE: "c2d-highcpu-8"
+  GCP_WIN_MACHINE_TYPE: "n2-standard-8"
+  IMAGE_MACOS_X86_64: "generic-13-ventura-x64"
+  IMAGE_UBUNTU_X86_64: "family/platform-ingest-beats-ubuntu-2204"
+  IMAGE_WIN_11: "family/platform-ingest-beats-windows-11"
 
 ---
 # $yaml-language-server: $schema=https://raw.githubusercontent.com/buildkite/pipeline-schema/main/schema.json
 steps:
   - label: ":buildkite: Lint"
-    command:
-      - ".buildkite/scripts/lint.sh"
+    command: |
+      echo "--- Mage notice"
+      mage notice
+      echo "--- Mage check"
+      mage -v check
     agents:
-      image: golang:${GO_VERSION}
-      cpu: "8"
-      memory: "4G"
+      provider: "gcp"
+      image: "${IMAGE_UBUNTU_X86_64}"
+      machineType: "${GCP_DEFAULT_MACHINE_TYPE}"
       
   - label: ":linux: Test Linux"
     key: test-lin
-    command:
-      - ".buildkite/scripts/test.sh"
+    command: |
+      go test -v > output-report-linux.out
     agents:
-      image: golang:${GO_VERSION}
-      cpu: "8"
-      memory: "4G"
+      provider: "gcp"
+      image: "${IMAGE_UBUNTU_X86_64}"
+      machineType: "${GCP_DEFAULT_MACHINE_TYPE}"
     artifact_paths:
-      - "junit-*.xml"
+      - "output-report-*.out"
 
   - label: ":windows: Test Windows"
     key: test-win
-    command:
-      - ".buildkite/scripts/test.ps1"
+    command: |
+      go test -v > output-report.out
     agents:
       provider: "gcp"
-      image: "family/ci-windows-2019"
+      image: "${IMAGE_WIN_11}"
+      machine_type: "${GCP_WIN_MACHINE_TYPE}"
+      disk_size: 200
+      disk_type: "pd-ssd"
     artifact_paths:
-      - "junit-*.xml"
+      - "output-report-*.out"
 
   - label: ":mac: Test MacOS"
     key: test-mac
-    command:
-      - ".buildkite/scripts/test.sh junit-report-macos.xml"
+    command:|
+      go test -v > output-report-macos.out
     agents:
       provider: "orka"
-      imagePrefix: generic-13-ventura-x64
+      imagePrefix: "${IMAGE_MACOS_X86_64}"
     artifact_paths:
-      - "junit-*.xml"
-
-  - label: ":junit: Junit annotate"
-    plugins:
-      - junit-annotate#v2.4.1:
-          artifacts: "junit-*.xml"
-          fail-build-on-error: true
-    agents:
-      provider: "gcp" #junit plugin requires docker
-    depends_on:
-      - step: "test-lin"
-        allow_failure: true
-      - step: "test-win"
-        allow_failure: true
-      - step: "test-mac"
-        allow_failure: true
+      - "output-report-*.out"
