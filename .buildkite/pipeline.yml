@@ -39,7 +39,7 @@ steps:
     command: |
       set -eo pipefail
       buildkite-agent artifact download "output-*.report" .
-      ls *.report | xargs -I {} echo "running go-junit-report -out "{}-junit.xml" -in {}"; go-junit-report -out "{}-junit.xml" -in {}
+      ls *.report | xargs -I {} echo "running go-junit-report > "{}-junit.xml" <"; go-junit-report > "{}-junit.xml" < {}
     agents:
       provider: "gcp"
       image: "${IMAGE_UBUNTU_X86_64}"
