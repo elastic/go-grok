@@ -52,8 +52,9 @@ steps:
     command: |
       set -eo pipefail
       buildkite-agent artifact download "output-report-*.out" .
-      for f in build/**/*.out; do
-      echo "$f"
+      files=$(ls build/**/*.out)
+      echo "$files"
+      for f in $files; do
       go-junit-report > "junit-report-$f.xml" < "$f"
       done
     agents:
