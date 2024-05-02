@@ -36,7 +36,7 @@ steps:
   - label: ":windows: Test Windows"
     key: test-win
     command: |
-      go test -v > output-report.out
+      go test -v > output-report-windows.out
     agents:
       provider: "gcp"
       image: "${IMAGE_WIN_11}"
@@ -48,7 +48,7 @@ steps:
 
   - label: ":mac: Test MacOS"
     key: test-mac
-    command:|
+    command: |
       go test -v > output-report-macos.out
     agents:
       provider: "orka"
