@@ -46,8 +46,6 @@ steps:
       echo "----"
       ls .**/* | xargs echo
       echo "----"
-      ls /**/*.out | xargs echo
-      echo "----"
       ls ./*.out | xargs -I {} go-junit-report -out "junit-report-{}.xml" -in {}
       echo "----"
       allfiles=$(ls *.xml)
