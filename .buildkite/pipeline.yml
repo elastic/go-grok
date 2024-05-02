@@ -47,13 +47,29 @@ steps:
     artifact_paths:
       - "output-report-*.out"
 
-  - label: ":mac: Test MacOS"
-    key: test-mac
+  - label: ":pipeline: Process junit reports"
     command: |
-      set -euo pipefail
-      go test -v > output-report-macos.out
+      set -eo pipefail
+      buildkite-agent artifact download "output-report-*.out" .
+      for f in $(ls *.out)
+      do
+        go-junit-report > "${junit-report-$f.xml}" < $f
+      done
     agents:
-      provider: "orka"
-      imagePrefix: "${IMAGE_MACOS_X86_64}"
-    artifact_paths:
-      - "output-report-*.out"
+      image: "docker.elastic.co/ci-agent-images/platform-ingest/buildkite-agent-beats-ci-with-hooks:0.1"
+      useCustomGlobalHooks: true
+    artifact_paths: 
+      junit-report-*
+
+  - label: ":junit: Junit annotate"
+    plugins:
+      - junit-annotate#v2.4.1:
+          artifacts: "junit-*.xml"
+          fail-build-on-error: true
+    agents:
+      provider: "gcp" #junit plugin requires docker
+    depends_on:
+      - step: "test-lin"
+        allow_failure: true
+      - step: "test-win"
+        allow_failure: true
