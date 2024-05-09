@@ -210,9 +210,9 @@ func (grok *Grok) convertMatch(match, name string) (interface{}, error) {
 		return match, nil
 
 	case "double":
-		strconv.ParseFloat(match, 64)
+		return strconv.ParseFloat(match, 64)
 	case "float":
-		strconv.ParseFloat(match, 64)
+		return strconv.ParseFloat(match, 64)
 
 	case "int":
 		return strconv.Atoi(match)
@@ -226,8 +226,6 @@ func (grok *Grok) convertMatch(match, name string) (interface{}, error) {
 	default:
 		return nil, fmt.Errorf("invalid type for %v: %w", name, ErrTypeNotProvided)
 	}
-
-	return nil, nil
 }
 
 // expand processes a pattern and returns expanded regular expression, type hints and error
