@@ -9,7 +9,7 @@ Grok is grok parsing library based on `re2` regexp.
 g := grok.New()
 
 // use custom patterns
-pattenDefinitions := map[string]string{
+patternDefinitions := map[string]string{
     // patterns can be nested
     "NGINX_HOST":         `(?:%{IP:destination.ip}|%{NGINX_NOTSEPARATOR:destination.domain})(:%{NUMBER:destination.port})?`,
     // NGINX_NOTSEPARATOR is used in NGINX_HOST. IP and NUMBER are part of default pattern set
