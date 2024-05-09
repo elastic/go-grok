@@ -118,7 +118,7 @@ func (grok *Grok) ParseTyped(text []byte) (map[string]interface{}, error) {
 	return captureBytes, nil
 }
 
-// ParseTyped parses text and returns map[string]interface{} with values
+// ParseTypedString parses text and returns map[string]interface{} with values
 // typed according to type hints generated at compile time.
 // If hint is not found error returned is TypeNotProvided.
 // When expression is not a match nil map is returned.

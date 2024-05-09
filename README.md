@@ -9,13 +9,13 @@ Grok is grok parsing library based on `re2` regexp.
 g := grok.New()
 
 // use custom patterns
-pattenDefinitions := map[string]string{
+patternDefinitions := map[string]string{
     // patterns can be nested
     "NGINX_HOST":         `(?:%{IP:destination.ip}|%{NGINX_NOTSEPARATOR:destination.domain})(:%{NUMBER:destination.port})?`,
     // NGINX_NOTSEPARATOR is used in NGINX_HOST. IP and NUMBER are part of default pattern set
     "NGINX_NOTSEPARATOR": `"[^\t ,:]+"`,
 }
-g.AddPatterns(pattenDefinitions)
+g.AddPatterns(patternDefinitions)
 
 // compile grok before use, this will generate regex.Regex based on pattern and 
 // subpatterns provided.
@@ -39,19 +39,19 @@ map[string]string {
 In this case we changed
 `err := g.Compile("%{NGINX_HOST}", false)` to
 `err := g.Compile("%{NGINX_HOST}", true)` 
-allowing unnamed return matches. In case on unnamed match, definition name is used. 
+allowing unnamed return matches. In case of unnamed match, definition name is used. 
 
 ```go
 g := grok.New()
 
 // use custom patterns
-pattenDefinitions := map[string]string{
+patternDefinitions := map[string]string{
     // patterns can be nested
     "NGINX_HOST":         `(?:%{IP:destination.ip}|%{NGINX_NOTSEPARATOR:destination.domain})(:%{NUMBER:destination.port})?`,
     // NGINX_NOTSEPARATOR is used in NGINX_HOST. IP and NUMBER are part of default pattern set
     "NGINX_NOTSEPARATOR": `"[^\t ,:]+"`,
 }
-g.AddPatterns(pattenDefinitions)
+g.AddPatterns(patternDefinitions)
 
 // compile grok before use, this will generate regex.Regex based on pattern and 
 // subpatterns provided
@@ -80,11 +80,11 @@ In this case we're marking `destination.port` as `int` using definition `%{NUMBE
 g := grok.New()
 
 // use custom patterns
-pattenDefinitions := map[string]string{
+patternDefinitions := map[string]string{
     "NGINX_HOST":         `(?:%{IP:destination.ip}|%{NGINX_NOTSEPARATOR:destination.domain})(:%{NUMBER:destination.port:int})?`,
     "NGINX_NOTSEPARATOR": `"[^\t ,:]+"`,
 }
-g.AddPatterns(pattenDefinitions)
+g.AddPatterns(patternDefinitions)
 
 // compile grok before use, this will generate regex.Regex based on pattern and 
 // subpatterns provided
