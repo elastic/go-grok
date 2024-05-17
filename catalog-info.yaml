@@ -9,7 +9,7 @@ metadata:
 
 spec:
   type: library
-  owner: group:elastic-agent-control-plane
+  owner: group:ingest-fp
   system: platform-ingest
   lifecycle: production
 ---
