@@ -79,6 +79,8 @@ func NewWithPatterns(patterns ...map[string]string) *Grok {
 func NewComplete(additionalPatterns ...map[string]string) *Grok {
 	g := NewWithPatterns(
 		patterns.AWS,
+		patterns.Bind9,
+		patterns.PostgreSQL,
 	)
 
 	for _, p := range additionalPatterns {
