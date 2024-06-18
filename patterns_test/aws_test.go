@@ -25,7 +25,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestParseWithDefaultPatterns(t *testing.T) {
+func TestParseWithPatterns_AWS(t *testing.T) {
 	testCases := []struct {
 		Name            string
 		Pattern         string
