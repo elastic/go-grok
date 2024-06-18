@@ -60,7 +60,7 @@ var Default map[string]string = map[string]string{
 	"UNIXPATH":     `(/[\w_%!$@:.,+~-]+)+`,
 	"TTY":          `/dev/(pts|tty([pq])?)(\w+)?/?(?:[0-9]+)`,
 	"WINPATH":      `[A-Za-z]+:(\\[^\\?*]+)+`,
-	"URIPROTO":     `[A-Za-z][A-Za-z0-9+\-.]+`,
+	"URIPROTO":     `[A-Za-z][A-Za-z0-9+\.-]+`,
 	"URIHOST":      `%{IPORHOST}(?::%{POSINT})?`,
 	"URIPATH":      `(/[A-Za-z0-9$.+!*'(){},~:;=@#%&_\-]+)+`,
 	"URIQUERY":     `[A-Za-z0-9$.+!*'|(){},~@#%&/=:;_?\-\[\]<>]*`,

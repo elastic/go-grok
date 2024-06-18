@@ -62,6 +62,19 @@ func NewWithoutDefaultPatterns() *Grok {
 	}
 }
 
+func NewWithPatterns(patterns ...map[string]string) *Grok {
+	g := &Grok{
+		patternDefinitions:    make(map[string]string),
+		lookupDefaultPatterns: true,
+	}
+
+	for _, p := range patterns {
+		g.AddPatterns(p)
+	}
+
+	return g
+}
+
 func (grok *Grok) AddPattern(name, patternDefinition string) {
 	// overwrite existing if present
 	grok.patternDefinitions[name] = patternDefinition
