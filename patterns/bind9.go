@@ -18,11 +18,10 @@
 package patterns
 
 var Bind9 map[string]string = map[string]string{
-	"BIND9_TIMESTAMP":      `%{MONTHDAY}[-]%{MONTH}[-]%{YEAR} %{TIME}`,
-	"BIND9_DNSTYPE":        `(?:A|AAAA|CAA|CDNSKEY|CDS|CERT|CNAME|CSYNC|DLV|DNAME|DNSKEY|DS|HINFO|LOC|MX|NAPTR|NS|NSEC|NSEC3|OPENPGPKEY|PTR|RRSIG|RP|SIG|SMIMEA|SOA|SRV|TSIG|TXT|URI|IN)`,
-	"BIND9_CATEGORY":       `(?:queries)`,
-	"BIND9_QUESTION_CLASS": `(?:IN)`,
-	"BIND9_QUERYLOGBASE":   `client(:? @0x(?:[0-9A-Fa-f]+))? %{IP:client.ip}#%{POSINT:client.port:int} \(%{GREEDYDATA:bind.log.question.name}\): query: %{GREEDYDATA:dns.question.name} (?P<dns___question___class>(?:IN)) %{BIND9_DNSTYPE:dns.question.type}(:? %{DATA:bind.log.question.flags})? \(%{IP:server.ip}\)`,
-	"BIND9_QUERYLOG":       `%{BIND9_TIMESTAMP:timestamp} %{BIND9_CATEGORY:bing.log.category}: %{LOGLEVEL:log.level}: %{BIND9_QUERYLOGBASE}`,
-	"BIND9":                `%{BIND9_QUERYLOG}`,
+	"BIND9_TIMESTAMP":    `%{MONTHDAY}[-]%{MONTH}[-]%{YEAR} %{TIME}`,
+	"BIND9_DNSTYPE":      `(?:A|AAAA|CAA|CDNSKEY|CDS|CERT|CNAME|CSYNC|DLV|DNAME|DNSKEY|DS|HINFO|LOC|MX|NAPTR|NS|NSEC|NSEC3|OPENPGPKEY|PTR|RRSIG|RP|SIG|SMIMEA|SOA|SRV|TSIG|TXT|URI|IN)`,
+	"BIND9_CATEGORY":     `(?:queries)`,
+	"BIND9_QUERYLOGBASE": `client(:? @0x(?:[0-9A-Fa-f]+))? %{IP:client.ip}#%{POSINT:client.port:int} \(%{GREEDYDATA:bind.log.question.name}\): query: %{GREEDYDATA:dns.question.name} (?P<dns___question___class>(?:IN)) %{BIND9_DNSTYPE:dns.question.type}(:? %{DATA:bind.log.question.flags})? \(%{IP:server.ip}\)`,
+	"BIND9_QUERYLOG":     `%{BIND9_TIMESTAMP:timestamp} %{BIND9_CATEGORY:bing.log.category}: %{LOGLEVEL:log.level}: %{BIND9_QUERYLOGBASE}`,
+	"BIND9":              `%{BIND9_QUERYLOG}`,
 }

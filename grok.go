@@ -80,6 +80,7 @@ func NewComplete(additionalPatterns ...map[string]string) *Grok {
 	g := NewWithPatterns(
 		patterns.AWS,
 		patterns.Bind9,
+		patterns.Bro,
 		patterns.PostgreSQL,
 	)
 
