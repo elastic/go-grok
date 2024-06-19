@@ -81,6 +81,7 @@ func NewComplete(additionalPatterns ...map[string]string) *Grok {
 		patterns.AWS,
 		patterns.Bind9,
 		patterns.Bro,
+		patterns.Exim,
 		patterns.PostgreSQL,
 	)
 
