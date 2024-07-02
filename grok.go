@@ -88,6 +88,7 @@ func NewComplete(additionalPatterns ...map[string]string) *Grok {
 		patterns.Java,
 		patterns.Junos,
 		patterns.PostgreSQL,
+		patterns.Syslog,
 	)
 
 	for _, p := range additionalPatterns {
