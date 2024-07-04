@@ -91,6 +91,7 @@ func NewComplete(additionalPatterns ...map[string]string) *Grok {
 		patterns.MCollective,
 		patterns.MongoDB,
 		patterns.PostgreSQL,
+		patterns.Rails,
 		patterns.Syslog,
 	)
 
