@@ -87,6 +87,7 @@ func NewComplete(additionalPatterns ...map[string]string) *Grok {
 		patterns.Firewalls,
 		patterns.Java,
 		patterns.Junos,
+		patterns.Maven,
 		patterns.PostgreSQL,
 		patterns.Syslog,
 	)
