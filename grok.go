@@ -93,6 +93,7 @@ func NewComplete(additionalPatterns ...map[string]string) *Grok {
 		patterns.PostgreSQL,
 		patterns.Rails,
 		patterns.Redis,
+		patterns.Ruby,
 		patterns.Syslog,
 	)
 
