@@ -62,6 +62,49 @@ func NewWithoutDefaultPatterns() *Grok {
 	}
 }
 
+func NewWithPatterns(patterns ...map[string]string) *Grok {
+	g := &Grok{
+		patternDefinitions:    make(map[string]string),
+		lookupDefaultPatterns: true,
+	}
+
+	for _, p := range patterns {
+		g.AddPatterns(p)
+	}
+
+	return g
+}
+
+// NewComplete creates a grok parser with full set of patterns
+func NewComplete(additionalPatterns ...map[string]string) *Grok {
+	g := NewWithPatterns(
+		patterns.AWS,
+		patterns.Bind9,
+		patterns.Bro,
+		patterns.Exim,
+		patterns.HAProxy,
+		patterns.Httpd,
+		patterns.Firewalls,
+		patterns.Java,
+		patterns.Junos,
+		patterns.Maven,
+		patterns.MCollective,
+		patterns.MongoDB,
+		patterns.PostgreSQL,
+		patterns.Rails,
+		patterns.Redis,
+		patterns.Ruby,
+		patterns.Squid,
+		patterns.Syslog,
+	)
+
+	for _, p := range additionalPatterns {
+		g.AddPatterns(p)
+	}
+
+	return g
+}
+
 func (grok *Grok) AddPattern(name, patternDefinition string) {
 	// overwrite existing if present
 	grok.patternDefinitions[name] = patternDefinition
