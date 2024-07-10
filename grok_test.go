@@ -453,3 +453,26 @@ func TestDefaultPatterns(t *testing.T) {
 		}
 	}
 }
+
+func TestCaptureGroups(t *testing.T) {
+	testCases := []struct {
+		pattern              string
+		nco                  bool
+		containsCaptureGroup bool
+	}{
+		{`\b\w+\b`, true, false},
+		{`\b\w+\b`, false, false},
+		{`%{WORD}`, true, false},
+		{`%{WORD}`, false, true},
+		{`%{SYSLOGTIMESTAMP:timestamp}`, true, true},
+		{`%{SYSLOGTIMESTAMP:timestamp}`, false, true},
+	}
+
+	for i, tt := range testCases {
+		t.Run(fmt.Sprintf("test-case-%d", i), func(t *testing.T) {
+			g := grok.NewComplete()
+			g.Compile(tt.pattern, tt.nco)
+			require.Equal(t, tt.containsCaptureGroup, g.HasCaptureGroups())
+		})
+	}
+}
