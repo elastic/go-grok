@@ -117,6 +117,16 @@ func (grok *Grok) AddPatterns(patternDefinitions map[string]string) {
 	}
 }
 
+func (grok *Grok) HasCaptureGroups() bool {
+	for _, groupName := range grok.re.SubexpNames() {
+		if groupName != "" {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (grok *Grok) Compile(pattern string, namedCapturesOnly bool) error {
 	return grok.compile(pattern, namedCapturesOnly)
 }
