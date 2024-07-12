@@ -131,7 +131,7 @@ func TestParseWithPatterns_HAProxy(t *testing.T) {
 			`Jun 18 12:34:56 host haproxy: 192.168.0.1:12345 [26/Jun/2024:15:23:45.678] frontend backend/server 10/20/30/40/50 200 1234 - - sD 2/3/4/5/6 7/8 {header1:value1 header2:value2} {header3:value3 header4:value4} "GET https://user:pass@www.example.com:8080/path?query=123 HTTP/1.1"`,
 			map[string]string{
 				"timestamp":                                      "Jun 18 12:34:56",
-				"host.hostname":                                  "host",
+				"host.name":                                      "host",
 				"SYSLOGPROG":                                     "haproxy",
 				"source.address":                                 "192.168.0.1",
 				"source.port":                                    "12345",
@@ -165,7 +165,7 @@ func TestParseWithPatterns_HAProxy(t *testing.T) {
 			`Jun 18 12:34:56 host haproxy: 192.168.0.1:12345 [18/Jun/2023:12:34:56.789] frontend backend/server 20/30/50 1000 ---- 5/10/15/20/25 0/0`,
 			map[string]string{
 				"timestamp":                       "Jun 18 12:34:56",
-				"host.hostname":                   "host",
+				"host.name":                       "host",
 				"haproxy.frontend_name":           "frontend",
 				"haproxy.backend_name":            "backend",
 				"haproxy.server_name":             "server",

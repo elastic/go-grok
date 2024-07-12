@@ -45,11 +45,11 @@ func TestParseWithPatterns_Ruby(t *testing.T) {
 			"%{RUBY_LOGGER}",
 			"I, [2024-06-26T12:34:56.789Z #1234] INFO -- my_process: Process started successfully",
 			map[string]string{
-				"timestamp":    "2024-06-26T12:34:56.789Z",
-				"process.pid":  "1234",
-				"log.level":    "INFO",
-				"process.name": "my_process",
-				"message":      "Process started successfully",
+				"timestamp":       "2024-06-26T12:34:56.789Z",
+				"process.pid":     "1234",
+				"log.level":       "INFO",
+				"process.command": "my_process",
+				"message":         "Process started successfully",
 			},
 		},
 	}

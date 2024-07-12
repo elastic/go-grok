@@ -88,9 +88,9 @@ func TestParseWithPatterns_Exim(t *testing.T) {
 			"%{EXIM_REMOTE_HOST}",
 			"H=(mail.example.com) (192.168.1.1) [192.168.1.1]:25",
 			map[string]string{
-				"source.address":          "mail.example.com",
+				"source.host.name":        "mail.example.com",
 				"exim.log.remote_address": "192.168.1.1",
-				"source.ip":               "192.168.1.1",
+				"source.address":          "192.168.1.1",
 				"source.port":             "25",
 			},
 		},
@@ -99,8 +99,8 @@ func TestParseWithPatterns_Exim(t *testing.T) {
 			"%{EXIM_INTERFACE}",
 			"I=[192.168.1.1]:25",
 			map[string]string{
-				"destination.ip":   "192.168.1.1",
-				"destination.port": "25",
+				"destination.address": "192.168.1.1",
+				"destination.port":    "25",
 			},
 		},
 		{
@@ -108,7 +108,7 @@ func TestParseWithPatterns_Exim(t *testing.T) {
 			"%{EXIM_PROTOCOL}",
 			"P=SMTP",
 			map[string]string{
-				"network.protocol": "SMTP",
+				"network.protocol.name": "SMTP",
 			},
 		},
 		{
@@ -116,7 +116,7 @@ func TestParseWithPatterns_Exim(t *testing.T) {
 			"%{EXIM_MSG_SIZE}",
 			"S=1024",
 			map[string]string{
-				"exim.log.message.size": "1024",
+				"exim.log.message.body.size": "1024",
 			},
 		},
 		{
@@ -156,13 +156,13 @@ func TestParseWithPatterns_Exim(t *testing.T) {
 			"%{EXIM_NAMED_FIELDS}",
 			" H=(mail.example.com) (192.168.1.1) [192.168.1.1]:25 I=[192.168.1.1]:25",
 			map[string]string{
-				"source.address":          "mail.example.com",
+				"source.host.name":        "mail.example.com",
 				"exim.log.remote_address": "192.168.1.1",
-				"source.ip":               "192.168.1.1",
+				"source.address":          "192.168.1.1",
 				"source.port":             "25",
 
-				"destination.ip":   "192.168.1.1",
-				"destination.port": "25",
+				"destination.address": "192.168.1.1",
+				"destination.port":    "25",
 			},
 		},
 		{
@@ -179,13 +179,13 @@ func TestParseWithPatterns_Exim(t *testing.T) {
 				"exim.log.recipient.email": "recipient@example.com",
 
 				// named fields
-				"source.address":          "mail.example.com",
+				"source.host.name":        "mail.example.com",
 				"exim.log.remote_address": "192.168.1.1",
-				"source.ip":               "192.168.1.1",
+				"source.address":          "192.168.1.1",
 				"source.port":             "25",
 
-				"destination.ip":   "192.168.1.1",
-				"destination.port": "25",
+				"destination.address": "192.168.1.1",
+				"destination.port":    "25",
 			},
 		}, {
 			"EXIM",
@@ -201,13 +201,13 @@ func TestParseWithPatterns_Exim(t *testing.T) {
 				"exim.log.recipient.email": "recipient@example.com",
 
 				// named fields
-				"source.address":          "mail.example.com",
+				"source.host.name":        "mail.example.com",
 				"exim.log.remote_address": "192.168.1.1",
-				"source.ip":               "192.168.1.1",
+				"source.address":          "192.168.1.1",
 				"source.port":             "25",
 
-				"destination.ip":   "192.168.1.1",
-				"destination.port": "25",
+				"destination.address": "192.168.1.1",
+				"destination.port":    "25",
 			},
 		},
 	}

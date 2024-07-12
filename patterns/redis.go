@@ -20,5 +20,5 @@ package patterns
 var Redis map[string]string = map[string]string{
 	"REDISTIMESTAMP": `%{MONTHDAY} %{MONTH} %{TIME}`,
 	"REDISLOG":       `\[%{POSINT:process.pid:int}\] %{REDISTIMESTAMP:timestamp} \*`,
-	"REDISMONLOG":    `%{NUMBER:timestamp} \[%{INT:redis.database.id} %{IP:client.ip}:%{POSINT:client.port:int}\] "%{WORD:redis.command.name}"\s?%{GREEDYDATA:redis.command.args}`,
+	"REDISMONLOG":    `%{NUMBER:timestamp} \[%{INT:redis.database.id} %{IP:client.address}:%{POSINT:client.port:int}\] "%{WORD:redis.command.name}"\s?%{GREEDYDATA:redis.command.args}`,
 }

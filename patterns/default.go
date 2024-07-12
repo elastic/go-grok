@@ -114,7 +114,7 @@ var Default map[string]string = map[string]string{
 	"QS": `%{QUOTEDSTRING}`,
 
 	// Log formats
-	"SYSLOGBASE": `%{SYSLOGTIMESTAMP:timestamp} (?:%{SYSLOGFACILITY} )?%{SYSLOGHOST:host.hostname} %{SYSLOGPROG}:`,
+	"SYSLOGBASE": `%{SYSLOGTIMESTAMP:timestamp} (?:%{SYSLOGFACILITY} )?%{SYSLOGHOST:host.name} %{SYSLOGPROG}:`,
 
 	//	Log Levels
 	"LOGLEVEL": `(?i)(alert|trace|debug|notice|info(?:rmation)?|warn(?:ing)?|err(?:or)?|crit(?:ical)?|fatal|severe|emerg(?:ency)?)`,
