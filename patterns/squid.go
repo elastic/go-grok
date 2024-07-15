@@ -19,5 +19,5 @@ package patterns
 
 var Squid map[string]string = map[string]string{
 	"SQUID3_STATUS": `(?:%{POSINT:http.response.status_code:int}|0|000)`,
-	"SQUID3":        `%{NUMBER:timestamp}\s+%{NUMBER:squid.request.duration:int}\s%{IP:source.ip}\s%{WORD:event.action}/%{SQUID3_STATUS}\s%{INT:http.response.bytes:long}\s%{WORD:http.request.method}\s%{NOTSPACE:url.original}\s(?:-|%{NOTSPACE:user.name})\s%{WORD:squid.hierarchy_code}/(?:-|%{IPORHOST:destination.address})\s(?:-|%{NOTSPACE:http.response.mime_type})`,
+	"SQUID3":        `%{NUMBER:timestamp}\s+%{NUMBER:squid.request.duration:int}\s%{IP:source.address}\s%{WORD:event.action}/%{SQUID3_STATUS}\s%{INT:http.response.bytes:long}\s%{WORD:http.request.method}\s%{NOTSPACE:url.original}\s(?:-|%{NOTSPACE:user.name})\s%{WORD:squid.hierarchy_code}/(?:-|%{IPORHOST:destination.address})\s(?:-|%{NOTSPACE:http.response.mime_type})`,
 }

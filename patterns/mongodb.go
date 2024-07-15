@@ -18,12 +18,12 @@
 package patterns
 
 var MongoDB map[string]string = map[string]string{
-	"MONGO_LOG":           `%{SYSLOGTIMESTAMP:timestamp} \[%{WORD:mongodb.component}\] %{GREEDYDATA:message}`,
+	"MONGO_LOG":           `%{SYSLOGTIMESTAMP:timestamp} \[%{WORD:db.mongodb.component}\] %{GREEDYDATA:message}`,
 	"MONGO_QUERY_CONTENT": `(.*?)`,
 	"MONGO_QUERY":         `\{ %{MONGO_QUERY_CONTENT:MONGO_QUERY} \} ntoreturn:`,
-	"MONGO_SLOWQUERY":     `%{WORD:mongodb.profile.op} %{MONGO_WORDDASH:mongodb.database}\.%{MONGO_WORDDASH:mongodb.collection} %{WORD}: \{ %{MONGO_QUERY_CONTENT:mongodb.query.original} \} ntoreturn:%{NONNEGINT:mongodb.profile.ntoreturn:int} ntoskip:%{NONNEGINT:mongodb.profile.ntoskip:int} nscanned:%{NONNEGINT:mongodb.profile.nscanned:int}.*? nreturned:%{NONNEGINT:mongodb.profile.nreturned:int}.*? %{INT:mongodb.profile.duration:int}ms`,
+	"MONGO_SLOWQUERY":     `%{WORD:db.mongodb.profile.op} %{MONGO_WORDDASH:db.mongodb.database}\.%{MONGO_WORDDASH:db.mongodb.collection} %{WORD}: \{ %{MONGO_QUERY_CONTENT:db.mongodb.query.original} \} ntoreturn:%{NONNEGINT:db.mongodb.profile.ntoreturn:int} ntoskip:%{NONNEGINT:db.mongodb.profile.ntoskip:int} nscanned:%{NONNEGINT:db.mongodb.profile.nscanned:int}.*? nreturned:%{NONNEGINT:db.mongodb.profile.nreturned:int}.*? %{INT:db.mongodb.profile.duration:int}ms`,
 	"MONGO_WORDDASH":      `\b[\w-]+\b`,
 	"MONGO3_SEVERITY":     `\w`,
 	"MONGO3_COMPONENT":    `%{WORD}`,
-	"MONGO3_LOG":          `%{TIMESTAMP_ISO8601:timestamp} %{MONGO3_SEVERITY:log.level} (?:-|%{MONGO3_COMPONENT:mongodb.component})%{SPACE}(?:\[%{DATA:mongodb.context}\])? %{GREEDYDATA:message}`,
+	"MONGO3_LOG":          `%{TIMESTAMP_ISO8601:timestamp} %{MONGO3_SEVERITY:log.level} (?:-|%{MONGO3_COMPONENT:db.mongodb.component})%{SPACE}(?:\[%{DATA:db.mongodb.context}\])? %{GREEDYDATA:message}`,
 }

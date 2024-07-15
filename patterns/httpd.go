@@ -21,7 +21,7 @@ var Httpd map[string]string = map[string]string{
 	"HTTPDUSER":       `%{EMAILADDRESS}|%{USER}`,
 	"HTTPDERROR_DATE": `%{DAY} %{MONTH} %{MONTHDAY} %{TIME} %{YEAR}`,
 
-	"HTTPD_COMMONLOG":   `%{IPORHOST:source.address} (?:-|%{HTTPDUSER:apache.access.user.identity}) (?:-|%{HTTPDUSER:user.name}) \[%{HTTPDATE:timestamp}\] "(?:%{WORD:http.request.method} %{NOTSPACE:url.original}(?: HTTP/%{NUMBER:http.version})?|%{DATA})" (?:-|%{INT:http.response.status_code:int}) (?:-|%{INT:http.response.body.bytes:long})`,
+	"HTTPD_COMMONLOG":   `%{IPORHOST:source.address} (?:-|%{HTTPDUSER:apache.access.user.identity}) (?:-|%{HTTPDUSER:user.name}) \[%{HTTPDATE:timestamp}\] "(?:%{WORD:http.request.method} %{NOTSPACE:url.original}(?: HTTP/%{NUMBER:http.version})?|%{DATA})" (?:-|%{INT:http.response.status_code:int}) (?:-|%{INT:http.response.body.size:long})`,
 	"HTTPD_COMBINEDLOG": `%{HTTPD_COMMONLOG} "(?:-|%{DATA:http.request.referrer})" "(?:-|%{DATA:user_agent.original})"`,
 
 	"HTTPD20_ERRORLOG": `\[%{HTTPDERROR_DATE:timestamp}\] \[%{LOGLEVEL:log.level}\] (?:\[client %{IPORHOST:source.address}\] )?%{GREEDYDATA:message}`,

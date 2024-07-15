@@ -48,7 +48,7 @@ func TestParseWithPatterns_Squid(t *testing.T) {
 			map[string]string{
 				"timestamp":                 "1624624800.123",
 				"squid.request.duration":    "1500",
-				"source.ip":                 "192.168.1.1",
+				"source.address":            "192.168.1.1",
 				"event.action":              "TCP_MISS",
 				"http.response.status_code": "200",
 				"http.response.bytes":       "5120",
