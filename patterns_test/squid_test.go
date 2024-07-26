@@ -64,7 +64,8 @@ func TestParseWithPatterns_Squid(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.Name, func(t *testing.T) {
-			g := grok.NewWithPatterns(patterns.Squid)
+			g, err := grok.NewWithPatterns(patterns.Squid)
+			require.NoError(t, err)
 			require.NoError(t, g.Compile(tt.Pattern, false))
 
 			res, err := g.ParseString(tt.Text)

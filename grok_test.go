@@ -470,9 +470,33 @@ func TestCaptureGroups(t *testing.T) {
 
 	for i, tt := range testCases {
 		t.Run(fmt.Sprintf("test-case-%d", i), func(t *testing.T) {
-			g := grok.NewComplete()
+			g, err := grok.NewComplete()
+			require.NoError(t, err)
 			g.Compile(tt.pattern, tt.nco)
 			require.Equal(t, tt.containsCaptureGroup, g.HasCaptureGroups())
 		})
 	}
+}
+
+func TestUnsupportedName(t *testing.T) {
+	invalidPatterns := map[string]string{
+		"INVALID:NAME": "val",
+	}
+	g, err := grok.NewWithPatterns(invalidPatterns)
+	require.Nil(t, g)
+	require.Equal(t, err, grok.ErrUnsupportedName)
+
+	g, err = grok.NewComplete(invalidPatterns)
+	require.Nil(t, g)
+	require.Equal(t, err, grok.ErrUnsupportedName)
+
+	g = grok.New()
+	require.NotNil(t, g)
+	err = g.AddPattern("INVALID:NAME", "val")
+	require.Equal(t, err, grok.ErrUnsupportedName)
+
+	// add also a valid one
+	invalidPatterns["VALID"] = "*."
+	err = g.AddPatterns(invalidPatterns)
+	require.Equal(t, err, grok.ErrUnsupportedName)
 }

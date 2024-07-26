@@ -161,7 +161,8 @@ func TestParseWithPatterns_Httpd(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.Name, func(t *testing.T) {
-			g := grok.NewWithPatterns(patterns.Httpd)
+			g, err := grok.NewWithPatterns(patterns.Httpd)
+			require.NoError(t, err)
 			require.NoError(t, g.Compile(tt.Pattern, false))
 
 			res, err := g.ParseString(tt.Text)
