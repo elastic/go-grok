@@ -249,7 +249,8 @@ func TestParseWithPatterns_AWS(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.Name, func(t *testing.T) {
-			g := grok.NewWithPatterns(patterns.AWS)
+			g, err := grok.NewWithPatterns(patterns.AWS)
+			require.NoError(t, err)
 			require.NoError(t, g.Compile(tt.Pattern, true))
 
 			res, err := g.ParseString(tt.Text)

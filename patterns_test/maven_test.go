@@ -45,7 +45,8 @@ func TestParseWithPatterns_Maven(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.Name, func(t *testing.T) {
-			g := grok.NewWithPatterns(patterns.Maven)
+			g, err := grok.NewWithPatterns(patterns.Maven)
+			require.NoError(t, err)
 			require.NoError(t, g.Compile(tt.Pattern, false))
 
 			res, err := g.ParseString(tt.Text)

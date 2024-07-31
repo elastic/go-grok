@@ -115,7 +115,8 @@ func TestParseWithPatterns_Rails(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.Name, func(t *testing.T) {
-			g := grok.NewWithPatterns(patterns.Rails)
+			g, err := grok.NewWithPatterns(patterns.Rails)
+			require.NoError(t, err)
 			require.NoError(t, g.Compile(tt.Pattern, false))
 
 			res, err := g.ParseString(tt.Text)
