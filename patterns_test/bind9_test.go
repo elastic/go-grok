@@ -64,13 +64,13 @@ func TestParseWithPatterns_Bind9(t *testing.T) {
 			"%{BIND9_QUERYLOGBASE}",
 			"client @0x1234567890 192.168.1.100#53245 (example.com): query: www.example.com IN A UDP (192.0.2.1)",
 			map[string]string{
-				"client.ip":              "192.168.1.100",
+				"client.address":         "192.168.1.100",
 				"client.port":            "53245",
 				"bind.log.question.name": "example.com",
 				"dns.question.name":      "www.example.com",
 				"dns.question.class":     "IN",
 				"dns.question.type":      "A",
-				"server.ip":              "192.0.2.1",
+				"server.address":         "192.0.2.1",
 			},
 		},
 		{
@@ -81,13 +81,13 @@ func TestParseWithPatterns_Bind9(t *testing.T) {
 				"timestamp":              "18-Jun-2024 12:34:56",
 				"bing.log.category":      "queries",
 				"log.level":              "INFO",
-				"client.ip":              "192.168.1.100",
+				"client.address":         "192.168.1.100",
 				"client.port":            "53245",
 				"bind.log.question.name": "example.com",
 				"dns.question.name":      "www.example.com",
 				"dns.question.class":     "IN",
 				"dns.question.type":      "A",
-				"server.ip":              "192.0.2.1",
+				"server.address":         "192.0.2.1",
 			},
 		},
 		{
@@ -102,16 +102,17 @@ func TestParseWithPatterns_Bind9(t *testing.T) {
 				"dns.question.name":      "www.example.com",
 				"dns.question.class":     "IN",
 				"dns.question.type":      "A",
-				"client.ip":              "192.168.1.100",
+				"client.address":         "192.168.1.100",
 				"client.port":            "53245",
-				"server.ip":              "192.0.2.1",
+				"server.address":         "192.0.2.1",
 			},
 		},
 	}
 
 	for _, tt := range testCases {
 		t.Run(tt.Name, func(t *testing.T) {
-			g := grok.NewWithPatterns(patterns.Bind9)
+			g, err := grok.NewWithPatterns(patterns.Bind9)
+			require.NoError(t, err)
 			require.NoError(t, g.Compile(tt.Pattern, false))
 
 			res, err := g.ParseString(tt.Text)

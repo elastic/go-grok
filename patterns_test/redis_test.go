@@ -57,7 +57,7 @@ func TestParseWithPatterns_Redis(t *testing.T) {
 			map[string]string{
 				"timestamp":          "1624549200",
 				"redis.database.id":  "0",
-				"client.ip":          "127.0.0.1",
+				"client.address":     "127.0.0.1",
 				"client.port":        "6379",
 				"redis.command.name": "GET",
 				"redis.command.args": "\"mykey\"",
@@ -67,7 +67,8 @@ func TestParseWithPatterns_Redis(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.Name, func(t *testing.T) {
-			g := grok.NewWithPatterns(patterns.Redis)
+			g, err := grok.NewWithPatterns(patterns.Redis)
+			require.NoError(t, err)
 			require.NoError(t, g.Compile(tt.Pattern, false))
 
 			res, err := g.ParseString(tt.Text)

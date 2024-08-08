@@ -38,9 +38,9 @@ func TestParseWithPatterns_MongoDB(t *testing.T) {
 			"%{MONGO_LOG}",
 			"Jun 26 12:34:56 [NETWORK] Connection accepted",
 			map[string]string{
-				"timestamp":         "Jun 26 12:34:56",
-				"mongodb.component": "NETWORK",
-				"message":           "Connection accepted",
+				"timestamp":            "Jun 26 12:34:56",
+				"db.mongodb.component": "NETWORK",
+				"message":              "Connection accepted",
 			},
 		},
 		{
@@ -56,15 +56,15 @@ func TestParseWithPatterns_MongoDB(t *testing.T) {
 			"%{MONGO_SLOWQUERY}",
 			"find testdb.users query: { find: \"users\", filter: { age: { $gt: 30 } } } ntoreturn:1 ntoskip:0 nscanned:1000 nreturned:1 123ms",
 			map[string]string{
-				"mongodb.profile.op":        "find",
-				"mongodb.database":          "testdb",
-				"mongodb.collection":        "users",
-				"mongodb.query.original":    "find: \"users\", filter: { age: { $gt: 30 } }",
-				"mongodb.profile.ntoreturn": "1",
-				"mongodb.profile.ntoskip":   "0",
-				"mongodb.profile.nscanned":  "1000",
-				"mongodb.profile.nreturned": "1",
-				"mongodb.profile.duration":  "123",
+				"db.mongodb.profile.op":        "find",
+				"db.mongodb.database":          "testdb",
+				"db.mongodb.collection":        "users",
+				"db.mongodb.query.original":    "find: \"users\", filter: { age: { $gt: 30 } }",
+				"db.mongodb.profile.ntoreturn": "1",
+				"db.mongodb.profile.ntoskip":   "0",
+				"db.mongodb.profile.nscanned":  "1000",
+				"db.mongodb.profile.nreturned": "1",
+				"db.mongodb.profile.duration":  "123",
 			},
 		},
 		{
@@ -96,18 +96,19 @@ func TestParseWithPatterns_MongoDB(t *testing.T) {
 			"%{MONGO3_LOG}",
 			"2024-06-26T12:34:56Z I NETWORK [conn1] connection accepted",
 			map[string]string{
-				"timestamp":         "2024-06-26T12:34:56Z",
-				"log.level":         "I",
-				"mongodb.component": "NETWORK",
-				"mongodb.context":   "conn1",
-				"message":           "connection accepted",
+				"timestamp":            "2024-06-26T12:34:56Z",
+				"log.level":            "I",
+				"db.mongodb.component": "NETWORK",
+				"db.mongodb.context":   "conn1",
+				"message":              "connection accepted",
 			},
 		},
 	}
 
 	for _, tt := range testCases {
 		t.Run(tt.Name, func(t *testing.T) {
-			g := grok.NewWithPatterns(patterns.MongoDB)
+			g, err := grok.NewWithPatterns(patterns.MongoDB)
+			require.NoError(t, err)
 			require.NoError(t, g.Compile(tt.Pattern, false))
 
 			res, err := g.ParseString(tt.Text)

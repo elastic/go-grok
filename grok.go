@@ -31,6 +31,7 @@ const dotSep = "___"
 var (
 	ErrParseFailure    = fmt.Errorf("parsing failed")
 	ErrTypeNotProvided = fmt.Errorf("type not specified")
+	ErrUnsupportedName = fmt.Errorf("name contains unsupported character ':'")
 
 	// grok can be specified in either of these forms:
 	// %{SYNTAX} - e.g {NUMBER}
@@ -62,22 +63,24 @@ func NewWithoutDefaultPatterns() *Grok {
 	}
 }
 
-func NewWithPatterns(patterns ...map[string]string) *Grok {
+func NewWithPatterns(patterns ...map[string]string) (*Grok, error) {
 	g := &Grok{
 		patternDefinitions:    make(map[string]string),
 		lookupDefaultPatterns: true,
 	}
 
 	for _, p := range patterns {
-		g.AddPatterns(p)
+		if err := g.AddPatterns(p); err != nil {
+			return nil, err
+		}
 	}
 
-	return g
+	return g, nil
 }
 
 // NewComplete creates a grok parser with full set of patterns
-func NewComplete(additionalPatterns ...map[string]string) *Grok {
-	g := NewWithPatterns(
+func NewComplete(additionalPatterns ...map[string]string) (*Grok, error) {
+	g, err := NewWithPatterns(
 		patterns.AWS,
 		patterns.Bind9,
 		patterns.Bro,
@@ -97,24 +100,39 @@ func NewComplete(additionalPatterns ...map[string]string) *Grok {
 		patterns.Squid,
 		patterns.Syslog,
 	)
+	if err != nil {
+		return nil, err
+	}
 
 	for _, p := range additionalPatterns {
-		g.AddPatterns(p)
+		if err := g.AddPatterns(p); err != nil {
+			return nil, err
+		}
 	}
 
-	return g
+	return g, nil
 }
 
-func (grok *Grok) AddPattern(name, patternDefinition string) {
+func (grok *Grok) AddPattern(name, patternDefinition string) error {
+	if strings.ContainsRune(name, ':') {
+		return ErrUnsupportedName
+	}
+
 	// overwrite existing if present
 	grok.patternDefinitions[name] = patternDefinition
+	return nil
 }
 
-func (grok *Grok) AddPatterns(patternDefinitions map[string]string) {
+func (grok *Grok) AddPatterns(patternDefinitions map[string]string) error {
 	// overwrite existing if present
 	for name, patternDefinition := range patternDefinitions {
+		if strings.ContainsRune(name, ':') {
+			return ErrUnsupportedName
+		}
+
 		grok.patternDefinitions[name] = patternDefinition
 	}
+	return nil
 }
 
 func (grok *Grok) HasCaptureGroups() bool {

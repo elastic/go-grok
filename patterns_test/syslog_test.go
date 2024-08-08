@@ -46,9 +46,9 @@ func TestParseWithPatterns_Syslog(t *testing.T) {
 			`%{SYSLOGBASE2}`,
 			"2024-06-26T12:34:56-0700 myhost program:",
 			map[string]string{
-				"timestamp":     "2024-06-26T12:34:56-0700",
-				"host.hostname": "myhost",
-				"SYSLOGPROG":    "program",
+				"timestamp":  "2024-06-26T12:34:56-0700",
+				"host.name":  "myhost",
+				"SYSLOGPROG": "program",
 			},
 		},
 		{
@@ -57,7 +57,7 @@ func TestParseWithPatterns_Syslog(t *testing.T) {
 			"Jun 26 12:34:56 myhost program: pam_unix(sshd session): session opened for user john by doe",
 			map[string]string{
 				"timestamp":                     "Jun 26 12:34:56",
-				"host.hostname":                 "myhost",
+				"host.name":                     "myhost",
 				"SYSLOGPROG":                    "program",
 				"system.auth.pam.module":        "pam_unix",
 				"system.auth.pam.origin":        "sshd session",
@@ -79,7 +79,7 @@ func TestParseWithPatterns_Syslog(t *testing.T) {
 			"Jun 26 12:34:56 myhost CRON[12345]: (john) CMD (ls -la)",
 			map[string]string{
 				"timestamp":          "Jun 26 12:34:56",
-				"host.hostname":      "myhost",
+				"host.name":          "myhost",
 				"SYSLOGPROG":         "CRON[12345]",
 				"user.name":          "john",
 				"system.cron.action": "CMD",
@@ -90,7 +90,8 @@ func TestParseWithPatterns_Syslog(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.Name, func(t *testing.T) {
-			g := grok.NewWithPatterns(patterns.Syslog)
+			g, err := grok.NewWithPatterns(patterns.Syslog)
+			require.NoError(t, err)
 			require.NoError(t, g.Compile(tt.Pattern, false))
 
 			res, err := g.ParseString(tt.Text)

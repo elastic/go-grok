@@ -45,18 +45,19 @@ func TestParseWithPatterns_Ruby(t *testing.T) {
 			"%{RUBY_LOGGER}",
 			"I, [2024-06-26T12:34:56.789Z #1234] INFO -- my_process: Process started successfully",
 			map[string]string{
-				"timestamp":    "2024-06-26T12:34:56.789Z",
-				"process.pid":  "1234",
-				"log.level":    "INFO",
-				"process.name": "my_process",
-				"message":      "Process started successfully",
+				"timestamp":       "2024-06-26T12:34:56.789Z",
+				"process.pid":     "1234",
+				"log.level":       "INFO",
+				"process.command": "my_process",
+				"message":         "Process started successfully",
 			},
 		},
 	}
 
 	for _, tt := range testCases {
 		t.Run(tt.Name, func(t *testing.T) {
-			g := grok.NewWithPatterns(patterns.Ruby)
+			g, err := grok.NewWithPatterns(patterns.Ruby)
+			require.NoError(t, err)
 			require.NoError(t, g.Compile(tt.Pattern, false))
 
 			res, err := g.ParseString(tt.Text)

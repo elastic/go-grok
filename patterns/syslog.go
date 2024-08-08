@@ -20,7 +20,7 @@ package patterns
 var Syslog map[string]string = map[string]string{
 	"SYSLOG5424PRINTASCII": `[!-~]+`,
 
-	"SYSLOGBASE2":      `(?:%{SYSLOGTIMESTAMP:timestamp}|%{TIMESTAMP_ISO8601:timestamp})(?: %{SYSLOGFACILITY})?(?: %{SYSLOGHOST:host.hostname})?(?: %{SYSLOGPROG}:)?`,
+	"SYSLOGBASE2":      `(?:%{SYSLOGTIMESTAMP:timestamp}|%{TIMESTAMP_ISO8601:timestamp})(?: %{SYSLOGFACILITY})?(?: %{SYSLOGHOST:host.name})?(?: %{SYSLOGPROG}:)?`,
 	"SYSLOGPAMSESSION": `%{SYSLOGBASE} (%{GREEDYDATA:message})%{WORD:system.auth.pam.module}\(%{DATA:system.auth.pam.origin}\): session %{WORD:system.auth.pam.session_state} for user %{USERNAME:user.name}(?: by %{GREEDYDATA})?`,
 
 	"CRON_ACTION": `[A-Z ]+`,
@@ -30,7 +30,7 @@ var Syslog map[string]string = map[string]string{
 
 	"SYSLOG5424PRI":  `<%{NONNEGINT:log.syslog.priority:int}>`,
 	"SYSLOG5424SD":   `\[%{DATA}\]+`,
-	"SYSLOG5424BASE": `%{SYSLOG5424PRI}%{NONNEGINT:system.syslog.version} +(?:-|%{TIMESTAMP_ISO8601:timestamp}) +(?:-|%{IPORHOST:host.hostname}) +(?:-|%{SYSLOG5424PRINTASCII:process.name}) +(?:-|%{POSINT:process.pid:int}) +(?:-|%{SYSLOG5424PRINTASCII:event.code}) +(?:-|%{SYSLOG5424SD:system.syslog.structured_data})?`,
+	"SYSLOG5424BASE": `%{SYSLOG5424PRI}%{NONNEGINT:system.syslog.version} +(?:-|%{TIMESTAMP_ISO8601:timestamp}) +(?:-|%{IPORHOST:host.name}) +(?:-|%{SYSLOG5424PRINTASCII:process.command}) +(?:-|%{POSINT:process.pid:int}) +(?:-|%{SYSLOG5424PRINTASCII:event.code}) +(?:-|%{SYSLOG5424SD:system.syslog.structured_data})?`,
 
 	"SYSLOG5424LINE": `%{SYSLOG5424BASE} +%{GREEDYDATA:message}`,
 }

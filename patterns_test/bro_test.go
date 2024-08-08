@@ -56,9 +56,9 @@ func TestParseWithPatterns_Bro(t *testing.T) {
 			map[string]string{
 				"timestamp":                 "1234567890",
 				"zeek.session_id":           "session123",
-				"source.ip":                 "192.168.1.100",
+				"source.address":            "192.168.1.100",
 				"source.port":               "53245",
-				"destination.ip":            "192.0.2.1",
+				"destination.address":       "192.0.2.1",
 				"destination.port":          "80",
 				"zeek.http.trans_depth":     "1",
 				"http.request.method":       "GET",
@@ -66,8 +66,8 @@ func TestParseWithPatterns_Bro(t *testing.T) {
 				"url.original":              "https://example.com/path",
 				"http.request.referrer":     "reff",
 				"user_agent.original":       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.9999.999 Safari/537.36",
-				"http.request.body.bytes":   "1024",
-				"http.response.body.bytes":  "2048",
+				"http.request.body.size":    "1024",
+				"http.response.body.size":   "2048",
 				"http.response.status_code": "200",
 				"zeek.http.status_msg":      "OK",
 				"zeek.http.info_code":       "200",
@@ -83,9 +83,9 @@ func TestParseWithPatterns_Bro(t *testing.T) {
 			map[string]string{
 				"timestamp":            "1623847260.25348",
 				"zeek.session_id":      "session456",
-				"source.ip":            "192.168.1.50",
+				"source.address":       "192.168.1.50",
 				"source.port":          "12345",
-				"destination.ip":       "192.0.2.50",
+				"destination.address":  "192.0.2.50",
 				"destination.port":     "53",
 				"network.transport":    "udp",
 				"dns.id":               "1234",
@@ -113,12 +113,12 @@ func TestParseWithPatterns_Bro(t *testing.T) {
 			map[string]string{
 				"timestamp":                      "1623847260.25348",
 				"zeek.session_id":                "session123",
-				"source.ip":                      "192.168.1.100",
+				"source.address":                 "192.168.1.100",
 				"source.port":                    "12345",
-				"destination.ip":                 "192.0.2.100",
+				"destination.address":            "192.0.2.100",
 				"destination.port":               "80",
 				"network.transport":              "tcp",
-				"network.protocol":               "http",
+				"network.protocol.name":          "http",
 				"zeek.connection.duration":       "10.5",
 				"zeek.connection.orig_bytes":     "5000",
 				"zeek.connection.resp_bytes":     "6000",
@@ -141,8 +141,8 @@ func TestParseWithPatterns_Bro(t *testing.T) {
 			map[string]string{
 				"timestamp":                 "1623847260.25348",
 				"zeek.files.fuid":           "F123abc",
-				"server.ip":                 "192.0.2.100",
-				"client.ip":                 "192.168.1.100",
+				"server.address":            "192.0.2.100",
+				"client.address":            "192.168.1.100",
 				"zeek.files.session_ids":    "session123",
 				"zeek.files.source":         "HTTP",
 				"zeek.files.depth":          "2",
@@ -168,7 +168,8 @@ func TestParseWithPatterns_Bro(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.Name, func(t *testing.T) {
-			g := grok.NewWithPatterns(patterns.Bro)
+			g, err := grok.NewWithPatterns(patterns.Bro)
+			require.NoError(t, err)
 			require.NoError(t, g.Compile(tt.Pattern, false))
 
 			res, err := g.ParseString(tt.Text)

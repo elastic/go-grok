@@ -48,7 +48,7 @@ func TestParseWithPatterns_Squid(t *testing.T) {
 			map[string]string{
 				"timestamp":                 "1624624800.123",
 				"squid.request.duration":    "1500",
-				"source.ip":                 "192.168.1.1",
+				"source.address":            "192.168.1.1",
 				"event.action":              "TCP_MISS",
 				"http.response.status_code": "200",
 				"http.response.bytes":       "5120",
@@ -64,7 +64,8 @@ func TestParseWithPatterns_Squid(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.Name, func(t *testing.T) {
-			g := grok.NewWithPatterns(patterns.Squid)
+			g, err := grok.NewWithPatterns(patterns.Squid)
+			require.NoError(t, err)
 			require.NoError(t, g.Compile(tt.Pattern, false))
 
 			res, err := g.ParseString(tt.Text)

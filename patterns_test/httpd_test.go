@@ -62,7 +62,7 @@ func TestParseWithPatterns_Httpd(t *testing.T) {
 				"url.original":                "/index.html",
 				"http.version":                "1.1",
 				"http.response.status_code":   "200",
-				"http.response.body.bytes":    "1234",
+				"http.response.body.size":     "1234",
 			},
 		},
 		{
@@ -78,7 +78,7 @@ func TestParseWithPatterns_Httpd(t *testing.T) {
 				"url.original":                "/index.html",
 				"http.version":                "1.1",
 				"http.response.status_code":   "200",
-				"http.response.body.bytes":    "1234",
+				"http.response.body.size":     "1234",
 				"user_agent.original":         "Mozilla/5.0",
 				"http.request.referrer":       "referrer",
 			},
@@ -136,7 +136,7 @@ func TestParseWithPatterns_Httpd(t *testing.T) {
 				"url.original":                "/index.html",
 				"http.version":                "1.1",
 				"http.response.status_code":   "200",
-				"http.response.body.bytes":    "1234",
+				"http.response.body.size":     "1234",
 			},
 		},
 		{
@@ -152,7 +152,7 @@ func TestParseWithPatterns_Httpd(t *testing.T) {
 				"url.original":                "/index.html",
 				"http.version":                "1.1",
 				"http.response.status_code":   "200",
-				"http.response.body.bytes":    "1234",
+				"http.response.body.size":     "1234",
 				"user_agent.original":         "Mozilla/5.0",
 				"http.request.referrer":       "referrer",
 			},
@@ -161,7 +161,8 @@ func TestParseWithPatterns_Httpd(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.Name, func(t *testing.T) {
-			g := grok.NewWithPatterns(patterns.Httpd)
+			g, err := grok.NewWithPatterns(patterns.Httpd)
+			require.NoError(t, err)
 			require.NoError(t, g.Compile(tt.Pattern, false))
 
 			res, err := g.ParseString(tt.Text)
