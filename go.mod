@@ -1,6 +1,6 @@
 module github.com/elastic/go-grok
 
-go 1.21.9
+go 1.21.0
 
 replace github.com/elastic/go-grok/dev-tools/mage => ./devtools/mage
 
