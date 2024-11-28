@@ -52,7 +52,8 @@ steps:
     command: ".buildkite/scripts/generate-report.sh"
     agents:
       provider: "gcp"
-      image: "${IMAGE_UBUNTU_X86_64}"
+      image: "platform-ingest-beats-ubuntu-2204-1733492198"
+      imageProject: "elastic-images-qa"
       machineType: "${GCP_DEFAULT_MACHINE_TYPE}"
     artifact_paths: 
       "*-junit.xml"
