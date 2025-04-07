@@ -19,7 +19,7 @@ package grok
 
 import (
 	"fmt"
-	"regexp"
+	"github.com/elastic/go-grok/regexp"
 	"strconv"
 	"strings"
 
@@ -45,7 +45,7 @@ var (
 
 type Grok struct {
 	patternDefinitions    map[string]string
-	re                    *regexp.Regexp
+	re                    regexp.Matcher
 	typeHints             map[string]string
 	lookupDefaultPatterns bool
 }
@@ -239,7 +239,7 @@ func (grok *Grok) captureTyped(text []byte) (map[string]interface{}, error) {
 	return captureTypeFn(grok.re, string(text), grok.convertMatch)
 }
 
-func captureTypeFn[K any](re *regexp.Regexp, text string, conversionFn func(v, key string) (K, error)) (map[string]K, error) {
+func captureTypeFn[K any](re regexp.Matcher, text string, conversionFn func(v, key string) (K, error)) (map[string]K, error) {
 	captures := make(map[string]K)
 
 	matches := re.FindStringSubmatch(text)
