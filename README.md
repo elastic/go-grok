@@ -93,9 +93,9 @@ err := g.Compile("%{NGINX_HOST}", true)
 res, err := g.ParseTypedString("127.0.0.1:1234")
 ```
 
-See type changed from `map[string]string` to `map[string]interface{}` and `destination.port` is now a number:
+See type changed from `map[string]string` to `map[string]any` and `destination.port` is now a number:
 ```go
-map[string]interface {} {
+map[string]any {
     "destination.ip": "127.0.0.1", 
     "destination.port": 1234, 
 }
