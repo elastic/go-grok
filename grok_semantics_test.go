@@ -105,6 +105,22 @@ func TestParseByteCapturesDoNotAliasInput(t *testing.T) {
 	require.Equal(t, []byte("42"), captures["number"])
 }
 
+func TestParseByteCapturesAreIndependent(t *testing.T) {
+	g := grok.New()
+	require.NoError(t, g.Compile(`%{WORD:first} %{WORD:second}`, true))
+
+	captures, err := g.Parse([]byte("hello world"))
+	require.NoError(t, err)
+
+	captures["first"][0] = 'j'
+	require.Equal(t, []byte("jello"), captures["first"])
+	require.Equal(t, []byte("world"), captures["second"])
+
+	extended := append(captures["first"], '!')
+	require.Equal(t, []byte("jello!"), extended)
+	require.Equal(t, []byte("world"), captures["second"])
+}
+
 func TestParseWithoutCaptureGroupsReturnsEmptyMap(t *testing.T) {
 	g := grok.New()
 	require.NoError(t, g.Compile(`foo`, true))

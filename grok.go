@@ -222,7 +222,6 @@ func (grok *Grok) compile(pattern string, namedCapturesOnly bool) error {
 func (grok *Grok) captureString(text string) (map[string]string, error) {
 	fields := grok.captureFields
 	if len(fields) == 0 {
-		_ = grok.re.MatchString(text)
 		return make(map[string]string), nil
 	}
 
@@ -250,7 +249,6 @@ func (grok *Grok) captureBytes(text []byte) (map[string][]byte, error) {
 func (grok *Grok) captureTyped(text string) (map[string]any, error) {
 	fields := grok.captureFields
 	if len(fields) == 0 {
-		_ = grok.re.MatchString(text)
 		return make(map[string]any), nil
 	}
 
@@ -278,7 +276,6 @@ func (grok *Grok) captureTyped(text string) (map[string]any, error) {
 func (grok *Grok) captureTypedBytes(text []byte) (map[string]any, error) {
 	fields := grok.captureFields
 	if len(fields) == 0 {
-		_ = grok.re.Match(text)
 		return make(map[string]any), nil
 	}
 
@@ -305,7 +302,6 @@ func (grok *Grok) captureTypedBytes(text []byte) (map[string]any, error) {
 
 func extractByteCaptures(re *regexp.Regexp, fields []captureField, text []byte) (map[string][]byte, error) {
 	if len(fields) == 0 {
-		_ = re.Match(text)
 		return make(map[string][]byte), nil
 	}
 
@@ -314,13 +310,24 @@ func extractByteCaptures(re *regexp.Regexp, fields []captureField, text []byte) 
 		return make(map[string][]byte), nil
 	}
 
+	var totalBytes int
+	for _, field := range fields {
+		start, end := matches[2*field.index], matches[2*field.index+1]
+		if start >= 0 && start != end {
+			totalBytes += end - start
+		}
+	}
+
+	buf := make([]byte, 0, totalBytes)
 	captures := make(map[string][]byte, len(fields))
 	for _, field := range fields {
 		start, end := matches[2*field.index], matches[2*field.index+1]
 		if start < 0 || start == end {
 			continue
 		}
-		captures[field.name] = append([]byte(nil), text[start:end]...)
+		offset := len(buf)
+		buf = append(buf, text[start:end]...)
+		captures[field.name] = buf[offset:len(buf):len(buf)]
 	}
 	return captures, nil
 }
