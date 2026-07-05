@@ -425,8 +425,9 @@ func (grok *Grok) expand(pattern string, namedCapturesOnly bool) (string, map[st
 
 			b.WriteString(expandedPattern[last:match[0]])
 			if namedCapturesOnly && !hasTarget {
-				// this has no semantic (pattern:foo) so we don't need to capture
-				b.WriteByte('(')
+				// this has no semantic (pattern:foo) so we don't need to capture;
+				// a non-capturing group keeps the regexp engine from tracking it
+				b.WriteString("(?:")
 				b.WriteString(knownPattern)
 				b.WriteByte(')')
 			} else {
