@@ -33,6 +33,9 @@ const (
 	benchNestedPattern = `%{NGINX_HOST} %{USERNAME} - %{EMAILADDRESS}`
 	benchNestedInput   = `127.0.0.1:1234 grok123 - grok123@elastic.co`
 
+	benchAnchoredPattern = `%{PATTERN}`
+	benchAnchoredInput   = `abcd`
+
 	benchHTTPDPattern = `%{HTTPD_COMBINEDLOG}`
 	benchHTTPDInput   = `127.0.0.1 user username [26/Jun/2024:12:34:56 -0700] "GET /index.html HTTP/1.1" 200 1234 "referrer" "Mozilla/5.0"`
 )
@@ -40,6 +43,14 @@ const (
 var benchNestedPatterns = map[string]string{
 	"NGINX_HOST":         `(?:%{IP:destination.ip}|%{NGINX_NOTSEPARATOR:destination.domain})(:%{NUMBER:destination.port:int})?`,
 	"NGINX_NOTSEPARATOR": `"[^\t ,:]+"`,
+}
+
+var benchAnchoredPatterns = map[string]string{
+	"PATTERN": `^abcd$`,
+}
+
+var benchStartAnchoredPatterns = map[string]string{
+	"PATTERN": `^bcd'`,
 }
 
 func BenchmarkGrokCompile(b *testing.B) {
@@ -51,20 +62,42 @@ func BenchmarkGrokCompile(b *testing.B) {
 		{name: "simple", pattern: `%{WORD:word}`},
 		{name: "apache", pattern: benchApachePattern},
 		{name: "nested", pattern: benchNestedPattern, patterns: benchNestedPatterns},
+		{name: "anchored_full", pattern: benchAnchoredPattern, patterns: benchAnchoredPatterns},
+		{name: "anchored_start", pattern: benchAnchoredPattern, patterns: benchStartAnchoredPatterns},
 		{name: "httpd", pattern: benchHTTPDPattern, patterns: patterns.Httpd},
 	} {
 		b.Run(tc.name, func(b *testing.B) {
-			g := grok.New()
-			if tc.patterns != nil {
-				if err := g.AddPatterns(tc.patterns); err != nil {
+			b.ReportAllocs()
+			for n := 0; n < b.N; n++ {
+				g := grok.New()
+				if tc.patterns != nil {
+					if err := g.AddPatterns(tc.patterns); err != nil {
+						b.Fatal(err)
+					}
+				}
+				if err := g.Compile(tc.pattern, true); err != nil {
 					b.Fatal(err)
 				}
 			}
+		})
+	}
+}
+
+func BenchmarkGrokRecompileAnchored(b *testing.B) {
+	for _, tc := range []struct {
+		name     string
+		patterns map[string]string
+	}{
+		{name: "full", patterns: benchAnchoredPatterns},
+		{name: "start", patterns: benchStartAnchoredPatterns},
+	} {
+		b.Run(tc.name, func(b *testing.B) {
+			g := newCompiledBenchGrok(b, benchAnchoredPattern, tc.patterns, true)
 
 			b.ReportAllocs()
 			b.ResetTimer()
 			for n := 0; n < b.N; n++ {
-				if err := g.Compile(tc.pattern, true); err != nil {
+				if err := g.Compile(benchAnchoredPattern, true); err != nil {
 					b.Fatal(err)
 				}
 			}
@@ -84,6 +117,28 @@ func BenchmarkGrokMatchString(b *testing.B) {
 		{name: "no_match_late", text: benchLateNoMatch},
 	} {
 		b.Run(tc.name, func(b *testing.B) {
+			b.ReportAllocs()
+			b.ResetTimer()
+			for n := 0; n < b.N; n++ {
+				_ = g.MatchString(tc.text)
+			}
+		})
+	}
+}
+
+func BenchmarkGrokMatchStringAnchored(b *testing.B) {
+	for _, tc := range []struct {
+		name     string
+		patterns map[string]string
+		text     string
+	}{
+		{name: "full/match", patterns: benchAnchoredPatterns, text: benchAnchoredInput},
+		{name: "full/no_match", patterns: benchAnchoredPatterns, text: "abcde"},
+		{name: "start/no_match", patterns: benchStartAnchoredPatterns, text: "abcdef"},
+	} {
+		b.Run(tc.name, func(b *testing.B) {
+			g := newCompiledBenchGrok(b, benchAnchoredPattern, tc.patterns, true)
+
 			b.ReportAllocs()
 			b.ResetTimer()
 			for n := 0; n < b.N; n++ {

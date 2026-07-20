@@ -51,10 +51,9 @@ type Grok struct {
 }
 
 type captureField struct {
-	index      int
-	regexpName string
-	name       string
-	valueType  captureValueType
+	index     int
+	name      string
+	valueType captureValueType
 }
 
 type captureValueType uint8
@@ -208,6 +207,11 @@ func (grok *Grok) compile(pattern string, namedCapturesOnly bool) error {
 		return err
 	}
 
+	if grok.re != nil && grok.re.String() == expandedExpression {
+		grok.captureFields = buildCaptureFields(grok.re, hints)
+		return nil
+	}
+
 	compiledExpression, err := regexp.Compile(expandedExpression)
 	if err != nil {
 		return err
@@ -343,13 +347,13 @@ func (grok *Grok) convertMatch(match string, field captureField) (any, error) {
 	case captureValueBool:
 		return strconv.ParseBool(match)
 	default:
-		return nil, fmt.Errorf("invalid type for %v: %w", field.regexpName, ErrTypeNotProvided)
+		return nil, fmt.Errorf("invalid type for %v: %w", strings.ReplaceAll(field.name, ".", dotSep), ErrTypeNotProvided)
 	}
 }
 
 func buildCaptureFields(re *regexp.Regexp, hints map[string]string) []captureField {
 	names := re.SubexpNames()
-	fields := make([]captureField, 0, len(names))
+	fields := make([]captureField, 0, re.NumSubexp())
 	for index, regexpName := range names {
 		if regexpName == "" {
 			continue
@@ -360,10 +364,9 @@ func buildCaptureFields(re *regexp.Regexp, hints map[string]string) []captureFie
 			valueType = captureValueTypeForHint(hint)
 		}
 		fields = append(fields, captureField{
-			index:      index,
-			regexpName: regexpName,
-			name:       strings.ReplaceAll(regexpName, dotSep, "."),
-			valueType:  valueType,
+			index:     index,
+			name:      strings.ReplaceAll(regexpName, dotSep, "."),
+			valueType: valueType,
 		})
 	}
 	return fields
@@ -392,24 +395,24 @@ func (grok *Grok) expand(pattern string, namedCapturesOnly bool) (string, map[st
 	// recursion break is guarding against cyclic reference in pattern definitions
 	// as this is performed only once at compile time more clever optimization (e.g detecting cycles in graph) is TBD
 	for recursionBreak := 1000; recursionBreak > 0; recursionBreak-- {
-		matches := reusePattern.FindAllStringSubmatchIndex(expandedPattern, -1)
-		if len(matches) == 0 {
+		match := reusePattern.FindStringSubmatchIndex(expandedPattern)
+		if match == nil {
 			// nothing to expand anymore
 			break
 		}
 
 		var b strings.Builder
 		b.Grow(len(expandedPattern))
-		var last int
+		var offset int
 
-		for _, match := range matches {
+		for match != nil {
 			// grok can be specified in either of these forms:
 			// %{SYNTAX} - e.g {NUMBER}
 			// %{SYNTAX:ID} - e.g {NUMBER:MY_AGE}
 			// %{SYNTAX:ID:TYPE} - e.g {NUMBER:MY_AGE:INT}
 
 			// match[2]:match[3] is the inner "SYNTAX:ID:TYPE" part.
-			grokId, targetId, typeHint, hasTarget, hasType := parseGrokName(expandedPattern[match[2]:match[3]])
+			grokId, targetId, typeHint, hasTarget, hasType := parseGrokName(expandedPattern[offset+match[2] : offset+match[3]])
 
 			knownPattern, found := grok.lookupPattern(grokId)
 			if !found {
@@ -423,7 +426,7 @@ func (grok *Grok) expand(pattern string, namedCapturesOnly bool) (string, map[st
 				hints[targetId] = typeHint
 			}
 
-			b.WriteString(expandedPattern[last:match[0]])
+			b.WriteString(expandedPattern[offset : offset+match[0]])
 			if namedCapturesOnly && !hasTarget {
 				// this has no semantic (pattern:foo) so we don't need to capture;
 				// a non-capturing group keeps the regexp engine from tracking it
@@ -437,9 +440,10 @@ func (grok *Grok) expand(pattern string, namedCapturesOnly bool) (string, map[st
 				b.WriteString(knownPattern)
 				b.WriteByte(')')
 			}
-			last = match[1]
+			offset += match[1]
+			match = reusePattern.FindStringSubmatchIndex(expandedPattern[offset:])
 		}
-		b.WriteString(expandedPattern[last:])
+		b.WriteString(expandedPattern[offset:])
 		expandedPattern = b.String()
 	}
 

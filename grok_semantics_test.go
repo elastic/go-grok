@@ -166,11 +166,46 @@ func TestParseWithoutCaptureGroupsReturnsEmptyMap(t *testing.T) {
 
 func TestParseTypedInvalidTypeHintReturnsTypeError(t *testing.T) {
 	g := grok.New()
-	require.NoError(t, g.Compile(`%{WORD:word:nope}`, true))
+	require.NoError(t, g.Compile(`%{WORD:destination.port:nope}`, true))
 
-	captures, err := g.ParseTypedString("hello")
-	require.ErrorIs(t, err, grok.ErrTypeNotProvided)
-	require.Nil(t, captures)
+	for _, tt := range []struct {
+		name  string
+		parse func() (map[string]any, error)
+	}{
+		{"ParseTypedString", func() (map[string]any, error) {
+			return g.ParseTypedString("hello")
+		}},
+		{"ParseTyped", func() (map[string]any, error) {
+			return g.ParseTyped([]byte("hello"))
+		}},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			captures, err := tt.parse()
+			require.EqualError(t, err, "invalid type for destination___port: type not specified")
+			require.ErrorIs(t, err, grok.ErrTypeNotProvided)
+			require.Nil(t, captures)
+		})
+	}
+}
+
+func TestRecompileRefreshesRegexpAndCaptureMetadata(t *testing.T) {
+	g := grok.NewWithoutDefaultPatterns()
+	require.NoError(t, g.AddPattern("VALUE", `\d+`))
+	require.NoError(t, g.Compile(`%{VALUE:value:string}`, true))
+
+	captures, err := g.ParseTypedString("42")
+	require.NoError(t, err)
+	require.Equal(t, map[string]any{"value": "42"}, captures)
+
+	require.NoError(t, g.Compile(`%{VALUE:value:int}`, true))
+	captures, err = g.ParseTypedString("42")
+	require.NoError(t, err)
+	require.Equal(t, map[string]any{"value": 42}, captures)
+
+	require.NoError(t, g.AddPattern("VALUE", `[a-z]+`))
+	require.NoError(t, g.Compile(`%{VALUE:value:int}`, true))
+	require.False(t, g.MatchString("42"))
+	require.True(t, g.MatchString("hello"))
 }
 
 func TestCompileExpansionSemantics(t *testing.T) {
