@@ -109,6 +109,7 @@ func NewComplete(additionalPatterns ...map[string]string) (*Grok, error) {
 		patterns.Maven,
 		patterns.MCollective,
 		patterns.MongoDB,
+		patterns.Nagios,
 		patterns.PostgreSQL,
 		patterns.Rails,
 		patterns.Redis,
