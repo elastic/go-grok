@@ -213,13 +213,12 @@ func TestParse(t *testing.T) {
 
 func TestParseWithDefaultPatterns(t *testing.T) {
 	testCases := []struct {
-		Name                 string
-		Patterns             map[string]string
-		Pattern              string
-		Text                 string
-		ExpectedMatches      map[string]string
-		ExpectedTypedMatches map[string]interface{}
-		NamedCapturesOnly    bool
+		Name              string
+		Patterns          map[string]string
+		Pattern           string
+		Text              string
+		ExpectedMatches   map[string]string
+		NamedCapturesOnly bool
 	}{
 		{
 			"hostname defined by nested patterns",
@@ -233,7 +232,6 @@ func TestParseWithDefaultPatterns(t *testing.T) {
 				"destination.ip":   "127.0.0.1",
 				"destination.port": "1234",
 			},
-			nil,
 			true,
 		},
 
@@ -252,7 +250,6 @@ func TestParseWithDefaultPatterns(t *testing.T) {
 				"NGINX_HOST":       "127.0.0.1:1234",
 				"IPV4":             "127.0.0.1",
 			},
-			nil,
 			false,
 		},
 	}
@@ -284,7 +281,7 @@ func TestTypedParseWithDefaultPatterns(t *testing.T) {
 		Patterns             map[string]string
 		Pattern              string
 		Text                 string
-		ExpectedTypedMatches map[string]interface{}
+		ExpectedTypedMatches map[string]any
 		NamedCapturesOnly    bool
 	}{
 		{
@@ -295,7 +292,7 @@ func TestTypedParseWithDefaultPatterns(t *testing.T) {
 			},
 			"%{NGINX_HOST}",
 			"127.0.0.1:1234",
-			map[string]interface{}{
+			map[string]any{
 				"destination.ip":   "127.0.0.1",
 				"destination.port": "1234",
 				"BASE10NUM":        "1234",
@@ -314,7 +311,7 @@ func TestTypedParseWithDefaultPatterns(t *testing.T) {
 			},
 			"%{NGINX_HOST} %{BOOL:destination.boolean:boolean}",
 			"127.0.0.1:1234 true",
-			map[string]interface{}{
+			map[string]any{
 				"destination.ip":      "127.0.0.1",
 				"destination.port":    1234,
 				"destination.boolean": true,

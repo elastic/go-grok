@@ -46,9 +46,25 @@ var (
 type Grok struct {
 	patternDefinitions    map[string]string
 	re                    *regexp.Regexp
-	typeHints             map[string]string
+	captureFields         []captureField
 	lookupDefaultPatterns bool
 }
+
+type captureField struct {
+	index     int
+	name      string
+	valueType captureValueType
+}
+
+type captureValueType uint8
+
+const (
+	captureValueString captureValueType = iota
+	captureValueFloat
+	captureValueInt
+	captureValueBool
+	captureValueInvalid
+)
 
 func New() *Grok {
 	return &Grok{
@@ -139,14 +155,7 @@ func (grok *Grok) HasCaptureGroups() bool {
 	if grok == nil || grok.re == nil {
 		return false
 	}
-
-	for _, groupName := range grok.re.SubexpNames() {
-		if groupName != "" {
-			return true
-		}
-	}
-
-	return false
+	return len(grok.captureFields) > 0
 }
 
 func (grok *Grok) Compile(pattern string, namedCapturesOnly bool) error {
@@ -163,42 +172,32 @@ func (grok *Grok) MatchString(text string) bool {
 
 // ParseString parses text in a form of string and returns map[string]string with values
 // not converted to types according to hints.
-// When expression is not a match nil map is returned.
+// When expression is not a match an empty map is returned.
 func (grok *Grok) ParseString(text string) (map[string]string, error) {
 	return grok.captureString(text)
 }
 
 // Parse parses text in a form of []byte and returns map[string][]byte with values
 // not converted to types according to hints.
-// When expression is not a match nil map is returned.
+// When expression is not a match an empty map is returned.
 func (grok *Grok) Parse(text []byte) (map[string][]byte, error) {
 	return grok.captureBytes(text)
 }
 
-// ParseTyped parses text and returns map[string]interface{} with values
+// ParseTyped parses text and returns map[string]any with values
 // typed according to type hints generated at compile time.
 // If hint is not found error returned is TypeNotProvided.
-// When expression is not a match nil map is returned.
-func (grok *Grok) ParseTyped(text []byte) (map[string]interface{}, error) {
-	captures, err := grok.captureTyped(text)
-	if err != nil {
-		return nil, err
-	}
-
-	captureBytes := make(map[string]interface{})
-	for k, v := range captures {
-		captureBytes[k] = v
-	}
-
-	return captureBytes, nil
+// When expression is not a match an empty map is returned.
+func (grok *Grok) ParseTyped(text []byte) (map[string]any, error) {
+	return grok.captureTypedBytes(text)
 }
 
-// ParseTypedString parses text and returns map[string]interface{} with values
+// ParseTypedString parses text and returns map[string]any with values
 // typed according to type hints generated at compile time.
 // If hint is not found error returned is TypeNotProvided.
-// When expression is not a match nil map is returned.
-func (grok *Grok) ParseTypedString(text string) (map[string]interface{}, error) {
-	return grok.ParseTyped([]byte(text))
+// When expression is not a match an empty map is returned.
+func (grok *Grok) ParseTypedString(text string) (map[string]any, error) {
+	return grok.captureTyped(text)
 }
 
 func (grok *Grok) compile(pattern string, namedCapturesOnly bool) error {
@@ -208,157 +207,257 @@ func (grok *Grok) compile(pattern string, namedCapturesOnly bool) error {
 		return err
 	}
 
+	if grok.re != nil && grok.re.String() == expandedExpression {
+		grok.captureFields = buildCaptureFields(grok.re, hints)
+		return nil
+	}
+
 	compiledExpression, err := regexp.Compile(expandedExpression)
 	if err != nil {
 		return err
 	}
 
 	grok.re = compiledExpression
-	grok.typeHints = hints
+	grok.captureFields = buildCaptureFields(compiledExpression, hints)
 
 	return nil
 }
 
 func (grok *Grok) captureString(text string) (map[string]string, error) {
-	return captureTypeFn(grok.re, text,
-		func(v, _ string) (string, error) {
-			return v, nil
-		},
-	)
-}
+	fields := grok.captureFields
+	if len(fields) == 0 {
+		return make(map[string]string), nil
+	}
 
-func (grok *Grok) captureBytes(text []byte) (map[string][]byte, error) {
-	return captureTypeFn(grok.re, string(text),
-		func(v, _ string) ([]byte, error) {
-			return []byte(v), nil
-		},
-	)
-}
-
-func (grok *Grok) captureTyped(text []byte) (map[string]interface{}, error) {
-	return captureTypeFn(grok.re, string(text), grok.convertMatch)
-}
-
-func captureTypeFn[K any](re *regexp.Regexp, text string, conversionFn func(v, key string) (K, error)) (map[string]K, error) {
-	captures := make(map[string]K)
-
-	matches := re.FindStringSubmatch(text)
+	matches := grok.re.FindStringSubmatchIndex(text)
 	if len(matches) == 0 {
-		return captures, nil
+		return make(map[string]string), nil
 	}
 
-	names := re.SubexpNames()
-	if len(names) == 0 {
-		return captures, nil
-	}
-
-	for i, name := range names {
-		if len(name) == 0 {
+	captures := make(map[string]string, len(fields))
+	for _, field := range fields {
+		start, end := matches[2*field.index], matches[2*field.index+1]
+		if start < 0 || start == end {
 			continue
 		}
 
-		match := matches[i]
-		if len(match) == 0 {
-			continue
-		}
-
-		if conversionFn != nil {
-			v, err := conversionFn(string(match), name)
-			if err != nil {
-				return nil, err
-			}
-			captures[strings.ReplaceAll(name, dotSep, ".")] = v
-		}
+		captures[field.name] = text[start:end]
 	}
-
 	return captures, nil
 }
 
-func (grok *Grok) convertMatch(match, name string) (interface{}, error) {
-	hint, found := grok.typeHints[name]
-	if !found {
-		return match, nil
+func (grok *Grok) captureBytes(text []byte) (map[string][]byte, error) {
+	return extractByteCaptures(grok.re, grok.captureFields, text)
+}
+
+func (grok *Grok) captureTyped(text string) (map[string]any, error) {
+	fields := grok.captureFields
+	if len(fields) == 0 {
+		return make(map[string]any), nil
 	}
 
-	switch hint {
-	case "string":
+	matches := grok.re.FindStringSubmatchIndex(text)
+	if len(matches) == 0 {
+		return make(map[string]any), nil
+	}
+
+	captures := make(map[string]any, len(fields))
+	for _, field := range fields {
+		start, end := matches[2*field.index], matches[2*field.index+1]
+		if start < 0 || start == end {
+			continue
+		}
+
+		v, err := grok.convertMatch(text[start:end], field)
+		if err != nil {
+			return nil, err
+		}
+		captures[field.name] = v
+	}
+	return captures, nil
+}
+
+func (grok *Grok) captureTypedBytes(text []byte) (map[string]any, error) {
+	fields := grok.captureFields
+	if len(fields) == 0 {
+		return make(map[string]any), nil
+	}
+
+	matches := grok.re.FindSubmatchIndex(text)
+	if len(matches) == 0 {
+		return make(map[string]any), nil
+	}
+
+	captures := make(map[string]any, len(fields))
+	for _, field := range fields {
+		start, end := matches[2*field.index], matches[2*field.index+1]
+		if start < 0 || start == end {
+			continue
+		}
+
+		v, err := grok.convertMatch(string(text[start:end]), field)
+		if err != nil {
+			return nil, err
+		}
+		captures[field.name] = v
+	}
+	return captures, nil
+}
+
+func extractByteCaptures(re *regexp.Regexp, fields []captureField, text []byte) (map[string][]byte, error) {
+	if len(fields) == 0 {
+		return make(map[string][]byte), nil
+	}
+
+	matches := re.FindSubmatchIndex(text)
+	if len(matches) == 0 {
+		return make(map[string][]byte), nil
+	}
+
+	var totalBytes int
+	for _, field := range fields {
+		start, end := matches[2*field.index], matches[2*field.index+1]
+		if start >= 0 && start != end {
+			totalBytes += end - start
+		}
+	}
+
+	buf := make([]byte, 0, totalBytes)
+	captures := make(map[string][]byte, len(fields))
+	for _, field := range fields {
+		start, end := matches[2*field.index], matches[2*field.index+1]
+		if start < 0 || start == end {
+			continue
+		}
+		offset := len(buf)
+		buf = append(buf, text[start:end]...)
+		captures[field.name] = buf[offset:len(buf):len(buf)]
+	}
+	return captures, nil
+}
+
+func (grok *Grok) convertMatch(match string, field captureField) (any, error) {
+	switch field.valueType {
+	case captureValueString:
 		return match, nil
-
-	case "double":
+	case captureValueFloat:
 		return strconv.ParseFloat(match, 64)
-	case "float":
-		return strconv.ParseFloat(match, 64)
-
-	case "int":
+	case captureValueInt:
 		return strconv.Atoi(match)
-	case "long":
-		return strconv.Atoi(match)
-
-	case "bool":
-		return strconv.ParseBool(match)
-	case "boolean":
+	case captureValueBool:
 		return strconv.ParseBool(match)
 	default:
-		return nil, fmt.Errorf("invalid type for %v: %w", name, ErrTypeNotProvided)
+		return nil, fmt.Errorf("invalid type for %v: %w", strings.ReplaceAll(field.name, ".", dotSep), ErrTypeNotProvided)
+	}
+}
+
+func buildCaptureFields(re *regexp.Regexp, hints map[string]string) []captureField {
+	names := re.SubexpNames()
+	fields := make([]captureField, 0, re.NumSubexp())
+	for index, regexpName := range names {
+		if regexpName == "" {
+			continue
+		}
+
+		valueType := captureValueString
+		if hint := hints[regexpName]; hint != "" {
+			valueType = captureValueTypeForHint(hint)
+		}
+		fields = append(fields, captureField{
+			index:     index,
+			name:      strings.ReplaceAll(regexpName, dotSep, "."),
+			valueType: valueType,
+		})
+	}
+	return fields
+}
+
+func captureValueTypeForHint(hint string) captureValueType {
+	switch hint {
+	case "", "string":
+		return captureValueString
+	case "double", "float":
+		return captureValueFloat
+	case "int", "long":
+		return captureValueInt
+	case "bool", "boolean":
+		return captureValueBool
+	default:
+		return captureValueInvalid
 	}
 }
 
 // expand processes a pattern and returns expanded regular expression, type hints and error
 func (grok *Grok) expand(pattern string, namedCapturesOnly bool) (string, map[string]string, error) {
-	hints := make(map[string]string)
+	var hints map[string]string
 	expandedPattern := pattern
 
 	// recursion break is guarding against cyclic reference in pattern definitions
 	// as this is performed only once at compile time more clever optimization (e.g detecting cycles in graph) is TBD
 	for recursionBreak := 1000; recursionBreak > 0; recursionBreak-- {
-		subMatches := reusePattern.FindAllStringSubmatch(expandedPattern, -1)
-		if len(subMatches) == 0 {
+		match := reusePattern.FindStringSubmatchIndex(expandedPattern)
+		if match == nil {
 			// nothing to expand anymore
 			break
 		}
 
-		for _, nameSubmatch := range subMatches {
+		var b strings.Builder
+		b.Grow(len(expandedPattern))
+		var offset int
+
+		for match != nil {
 			// grok can be specified in either of these forms:
 			// %{SYNTAX} - e.g {NUMBER}
 			// %{SYNTAX:ID} - e.g {NUMBER:MY_AGE}
 			// %{SYNTAX:ID:TYPE} - e.g {NUMBER:MY_AGE:INT}
 
-			// nameSubmatch is equal to [["%{NAME:ID:TYPe}" "NAME:ID:TYPe"]]
-			// we need only inner part
-			nameParts := strings.Split(nameSubmatch[1], ":")
-
-			grokId := nameParts[0]
-			var targetId string
-			if len(nameParts) > 1 {
-				targetId = strings.ReplaceAll(nameParts[1], ".", dotSep)
-			} else {
-				targetId = nameParts[0]
-			}
-			// compile hints for used patterns
-			if len(nameParts) == 3 {
-				hints[targetId] = nameParts[2]
-			}
+			// match[2]:match[3] is the inner "SYNTAX:ID:TYPE" part.
+			grokId, targetId, typeHint, hasTarget, hasType := parseGrokName(expandedPattern[offset+match[2] : offset+match[3]])
 
 			knownPattern, found := grok.lookupPattern(grokId)
 			if !found {
 				return "", nil, fmt.Errorf("pattern definition %q unknown: %w", grokId, ErrParseFailure)
 			}
 
-			var replacementPattern string
-			if namedCapturesOnly && len(nameParts) == 1 {
-				// this has no semantic (pattern:foo) so we don't need to capture
-				replacementPattern = "(" + knownPattern + ")"
-
-			} else {
-				replacementPattern = "(?P<" + targetId + ">" + knownPattern + ")"
+			if hasType {
+				if hints == nil {
+					hints = make(map[string]string)
+				}
+				hints[targetId] = typeHint
 			}
 
-			// expand pattern with definition
-			expandedPattern = strings.ReplaceAll(expandedPattern, nameSubmatch[0], replacementPattern)
+			b.WriteString(expandedPattern[offset : offset+match[0]])
+			if namedCapturesOnly && !hasTarget {
+				// this has no semantic (pattern:foo) so we don't need to capture;
+				// a non-capturing group keeps the regexp engine from tracking it
+				b.WriteString("(?:")
+				b.WriteString(knownPattern)
+				b.WriteByte(')')
+			} else {
+				b.WriteString("(?P<")
+				b.WriteString(targetId)
+				b.WriteByte('>')
+				b.WriteString(knownPattern)
+				b.WriteByte(')')
+			}
+			offset += match[1]
+			match = reusePattern.FindStringSubmatchIndex(expandedPattern[offset:])
 		}
+		b.WriteString(expandedPattern[offset:])
+		expandedPattern = b.String()
 	}
 
 	return expandedPattern, hints, nil
+}
+
+func parseGrokName(name string) (grokId, targetId, typeHint string, hasTarget, hasType bool) {
+	grokId, rest, hasTarget := strings.Cut(name, ":")
+	if !hasTarget {
+		return grokId, grokId, "", false, false
+	}
+
+	target, typeHint, hasType := strings.Cut(rest, ":")
+	return grokId, strings.ReplaceAll(target, ".", dotSep), typeHint, true, hasType
 }
 
 func (grok *Grok) lookupPattern(grokId string) (string, bool) {
@@ -373,5 +472,4 @@ func (grok *Grok) lookupPattern(grokId string) (string, bool) {
 	}
 
 	return "", false
-
 }
